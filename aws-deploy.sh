@@ -29,18 +29,74 @@ echo "Region: $AWS_REGION"
 echo "Project: $PROJECT_NAME"
 echo ""
 
-# Check prerequisites
+# ---- Check and Install Prerequisites ----
+echo "🔍 Checking prerequisites..."
+
+# Check AWS CLI
 if ! command -v aws &> /dev/null; then
     echo "❌ AWS CLI not found. Please install: https://aws.amazon.com/cli/"
     exit 1
 fi
+echo "   ✓ AWS CLI found"
 
-if ! command -v zip &> /dev/null; then
-    echo "❌ zip command not found. Please install zip."
-    exit 1
+# Check and install Node.js
+if ! command -v node &> /dev/null; then
+    echo "   ⚠ Node.js not found, installing..."
+    
+    # Detect OS and install accordingly
+    if [ -f /etc/redhat-release ]; then
+        # Amazon Linux / RHEL / CentOS
+        echo "   Installing Node.js 20 (Amazon Linux/RHEL)..."
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - > /dev/null 2>&1
+        yum install -y nodejs > /dev/null 2>&1
+    elif [ -f /etc/debian_version ]; then
+        # Debian / Ubuntu
+        echo "   Installing Node.js 20 (Debian/Ubuntu)..."
+        curl -fsSL https://deb.nodesource.com/setup_20.x | bash - > /dev/null 2>&1
+        apt-get install -y nodejs > /dev/null 2>&1
+    else
+        echo "   ❌ Unsupported OS. Please install Node.js 20 manually."
+        exit 1
+    fi
+    
+    if command -v node &> /dev/null; then
+        echo "   ✓ Node.js installed: $(node -v)"
+    else
+        echo "   ❌ Node.js installation failed"
+        exit 1
+    fi
+else
+    echo "   ✓ Node.js found: $(node -v)"
 fi
 
-echo "✓ Prerequisites OK"
+# Check and install npm
+if ! command -v npm &> /dev/null; then
+    echo "   ❌ npm not found (should come with Node.js)"
+    exit 1
+fi
+echo "   ✓ npm found: $(npm -v)"
+
+# Check and install zip
+if ! command -v zip &> /dev/null; then
+    echo "   ⚠ zip not found, installing..."
+    
+    if [ -f /etc/redhat-release ]; then
+        yum install -y zip > /dev/null 2>&1
+    elif [ -f /etc/debian_version ]; then
+        apt-get install -y zip > /dev/null 2>&1
+    fi
+    
+    if command -v zip &> /dev/null; then
+        echo "   ✓ zip installed"
+    else
+        echo "   ❌ zip installation failed"
+        exit 1
+    fi
+else
+    echo "   ✓ zip found"
+fi
+
+echo "✓ All prerequisites ready"
 echo ""
 
 # Get AWS Account ID
