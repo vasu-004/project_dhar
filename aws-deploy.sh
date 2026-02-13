@@ -284,7 +284,18 @@ exports.handler = async (event) => {
 EOF
 
 # Install dependencies
-npm install --production --prefix lambda-package @aws-sdk/client-dynamodb
+echo "   Installing AWS SDK dependencies..."
+if npm install --production --prefix lambda-package @aws-sdk/client-dynamodb 2>&1 | grep -v "^npm WARN" | grep -v "^$"; then
+    echo "   ✓ Dependencies installed successfully"
+else
+    # Check if node_modules exists anyway (install might have succeeded despite warnings)
+    if [ -d "lambda-package/node_modules/@aws-sdk" ]; then
+        echo "   ✓ Dependencies installed (with warnings)"
+    else
+        echo "   ❌ Failed to install dependencies"
+        exit 1
+    fi
+fi
 
 # Create ZIP
 cd lambda-package
