@@ -6,7 +6,7 @@
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$AWS_REGION = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
+$AWS_REGION = if ($env:AWS_REGION) { $env:AWS_REGION } else { "ap-south-1" }
 $PROJECT_NAME = "weather-analytics"
 $KINESIS_STREAM_NAME = "WeatherDataStream"
 $DYNAMODB_TABLE_NAME = "WeatherData"

@@ -14,7 +14,7 @@
 set -e  # Exit on error
 
 # Configuration
-AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_REGION="${AWS_REGION:-ap-south-1}"
 PROJECT_NAME="weather-analytics"
 KINESIS_STREAM_NAME="WeatherDataStream"
 DYNAMODB_TABLE_NAME="WeatherData"
@@ -67,10 +67,11 @@ echo ""
 
 # ---- 2. Create DynamoDB Table ----
 echo "💾 Creating DynamoDB Table: $DYNAMODB_TABLE_NAME..."
-if aws dynamodb describe-table --table-name "$DYNAMODB_TABLE_NAME" --region "$AWS_REGION" 2>/dev/null; then
-    echo "   Table already exists, skipping..."
+if aws dynamodb describe-table --table-name "$DYNAMODB_TABLE_NAME" --region "$AWS_REGION" 2>/dev/null 1>/dev/null; then
+    echo "   ✓ Table already exists, skipping..."
 else
-    aws dynamodb create-table \
+    # Use || true to prevent script exit on error
+    if aws dynamodb create-table \
         --table-name "$DYNAMODB_TABLE_NAME" \
         --attribute-definitions \
             AttributeName=city,AttributeType=S \
@@ -79,13 +80,16 @@ else
             AttributeName=city,KeyType=HASH \
             AttributeName=timestamp,KeyType=RANGE \
         --billing-mode PAY_PER_REQUEST \
-        --region "$AWS_REGION"
-    
-    echo "   ✓ DynamoDB Table created (pay-per-request billing)"
-    
-    # Wait for table to become active
-    echo "   Waiting for table to become ACTIVE..."
-    aws dynamodb wait table-exists --table-name "$DYNAMODB_TABLE_NAME" --region "$AWS_REGION"
+        --region "$AWS_REGION" 2>&1 | grep -v "ResourceInUseException"; then
+        
+        echo "   ✓ DynamoDB Table created (pay-per-request billing)"
+        
+        # Wait for table to become active
+        echo "   Waiting for table to become ACTIVE..."
+        aws dynamodb wait table-exists --table-name "$DYNAMODB_TABLE_NAME" --region "$AWS_REGION"
+    else
+        echo "   ✓ Table already exists (ignoring error)"
+    fi
 fi
 echo ""
 
