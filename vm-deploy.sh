@@ -3,8 +3,7 @@
 # VM Deployment Script
 # Weather Analytics Dashboard - Complete Setup
 # ============================================================
-# This script sets up the entire application on a fresh VM
-# Ubuntu 20.04+ recommended
+# Works on: Amazon Linux, Ubuntu, Debian, RHEL, CentOS
 # ============================================================
 
 set -e  # Exit on error
@@ -20,6 +19,27 @@ BACKEND_PORT=5000
 FRONTEND_PORT=80
 NODE_VERSION="20"
 
+# Detect package manager
+if command -v yum &> /dev/null; then
+    PKG_MGR="yum"
+    PKG_UPDATE="yum update -y -q"
+    PKG_INSTALL="yum install -y -q"
+    NGINX_CONF_DIR="/etc/nginx/conf.d"
+    NGINX_SITES_ENABLED=""
+elif command -v apt-get &> /dev/null; then
+    PKG_MGR="apt"
+    PKG_UPDATE="apt-get update -qq && apt-get upgrade -y -qq"
+    PKG_INSTALL="apt-get install -y"
+    NGINX_CONF_DIR="/etc/nginx/sites-available"
+    NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
+else
+    echo "❌ Unsupported system. Neither yum nor apt-get found."
+    exit 1
+fi
+
+echo "Detected package manager: $PKG_MGR"
+echo ""
+
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then 
     echo "❌ Please run as root: sudo bash vm-deploy.sh"
@@ -31,18 +51,22 @@ echo ""
 
 # ---- Step 1: System Update ----
 echo "📦 Step 1: Updating system packages..."
-apt-get update -qq
-apt-get upgrade -y -qq
+eval $PKG_UPDATE > /dev/null 2>&1
 echo "   ✓ System updated"
 echo ""
 
 # ---- Step 2: Install Node.js ----
 echo "📦 Step 2: Installing Node.js $NODE_VERSION..."
 if command -v node &> /dev/null; then
-    echo "   Node.js already installed: $(node -v)"
+    echo "   ✓ Node.js already installed: $(node -v)"
 else
-    curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
-    apt-get install -y nodejs
+    if [ "$PKG_MGR" = "yum" ]; then
+        curl -fsSL https://rpm.nodesource.com/setup_${NODE_VERSION}.x | bash - > /dev/null 2>&1 || true
+        $PKG_INSTALL nodejs > /dev/null 2>&1
+    else
+        curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - > /dev/null 2>&1
+        $PKG_INSTALL nodejs > /dev/null 2>&1
+    fi
     echo "   ✓ Node.js installed: $(node -v)"
 fi
 echo ""
@@ -50,10 +74,10 @@ echo ""
 # ---- Step 3: Install Nginx ----
 echo "📦 Step 3: Installing Nginx..."
 if command -v nginx &> /dev/null; then
-    echo "   Nginx already installed"
+    echo "   ✓ Nginx already installed"
 else
-    apt-get install -y nginx
-    systemctl enable nginx
+    $PKG_INSTALL nginx > /dev/null 2>&1
+    systemctl enable nginx > /dev/null 2>&1
     echo "   ✓ Nginx installed"
 fi
 echo ""
@@ -61,29 +85,36 @@ echo ""
 # ---- Step 4: Install PM2 (Process Manager) ----
 echo "📦 Step 4: Installing PM2..."
 if command -v pm2 &> /dev/null; then
-    echo "   PM2 already installed"
+    echo "   ✓ PM2 already installed"
 else
-    npm install -g pm2
-    pm2 startup systemd -u root --hp /root
+    npm install -g pm2 > /dev/null 2>&1
+    pm2 startup systemd -u root --hp /root > /dev/null 2>&1 || true
     echo "   ✓ PM2 installed"
 fi
 echo ""
 
-# ---- Step 5: Create Application Directory ----
+# ---- Step 5: Setup Application Directory ----
 echo "📁 Step 5: Setting up application directory..."
-mkdir -p $INSTALL_DIR
-cd $INSTALL_DIR
 
-# Copy project files (assumes script is run from project directory)
-if [ -d "/tmp/weather-analytics-deploy" ]; then
-    cp -r /tmp/weather-analytics-deploy/* .
-    echo "   ✓ Project files copied from /tmp/weather-analytics-deploy"
+# Determine where project files are
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -f "$SCRIPT_DIR/backend/package.json" ]; then
+    # Script is run from project directory  
+    echo "   Using files from: $SCRIPT_DIR"
+    mkdir -p $INSTALL_DIR
+    cp -r $SCRIPT_DIR/* $INSTALL_DIR/
+    echo "   ✓ Project files copied"
+elif [ -d "/tmp/weather-analytics-deploy/backend" ]; then
+    # Files uploaded to /tmp
+    echo "   Using files from: /tmp/weather-analytics-deploy"
+    mkdir -p $INSTALL_DIR
+    cp -r /tmp/weather-analytics-deploy/* $INSTALL_DIR/
+    echo "   ✓ Project files copied"
 else
-    echo "   ⚠ No files at /tmp/weather-analytics-deploy"
-    echo "   Please upload project files to /tmp/weather-analytics-deploy first"
-    echo ""
-    echo "   On your local machine, run:"
-    echo "   scp -r d:/project_dhar/* user@your-vm-ip:/tmp/weather-analytics-deploy/"
+    echo "   ❌ Project files not found!"
+    echo "   Please run this script from project directory, or upload files to:"
+    echo "   /tmp/weather-analytics-deploy/"
     exit 1
 fi
 echo ""
@@ -91,15 +122,15 @@ echo ""
 # ---- Step 6: Install Backend Dependencies ----
 echo "📦 Step 6: Installing backend dependencies..."
 cd $INSTALL_DIR/backend
-npm install --production
+npm install --production > /dev/null 2>&1
 echo "   ✓ Backend dependencies installed"
 echo ""
 
 # ---- Step 7: Build Frontend ----
 echo "📦 Step 7: Building frontend..."
 cd $INSTALL_DIR/frontend
-npm install
-npm run build
+npm install > /dev/null 2>&1
+npm run build > /dev/null 2>&1
 echo "   ✓ Frontend built to dist/"
 echo ""
 
@@ -107,7 +138,6 @@ echo ""
 echo "⚙️  Step 8: Configuring environment..."
 cd $INSTALL_DIR/backend
 
-# Prompt for OpenWeatherMap API key
 if [ ! -f .env ] || ! grep -q "OPENWEATHER_API_KEY=.\+" .env; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -142,7 +172,10 @@ echo ""
 
 # ---- Step 9: Configure Nginx ----
 echo "⚙️  Step 9: Configuring Nginx..."
-cat > /etc/nginx/sites-available/weather-analytics <<EOF
+
+if [ "$PKG_MGR" = "yum" ]; then
+    # Amazon Linux / RHEL - use conf.d
+    cat > /etc/nginx/conf.d/weather-analytics.conf <<EOF
 server {
     listen $FRONTEND_PORT;
     server_name _;
@@ -182,10 +215,47 @@ server {
     }
 }
 EOF
-
-# Enable site
-ln -sf /etc/nginx/sites-available/weather-analytics /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
+else
+    # Ubuntu / Debian - use sites-available/enabled
+    cat > /etc/nginx/sites-available/weather-analytics <<EOF
+server {
+    listen $FRONTEND_PORT;
+    server_name _;
+    
+    location / {
+        root $INSTALL_DIR/frontend/dist;
+        try_files \$uri \$uri/ /index.html;
+        
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+    
+    location /api/ {
+        proxy_pass http://localhost:$BACKEND_PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+    
+    location /ws {
+        proxy_pass http://localhost:$BACKEND_PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_read_timeout 86400;
+    }
+}
+EOF
+    ln -sf /etc/nginx/sites-available/weather-analytics /etc/nginx/sites-enabled/
+    rm -f /etc/nginx/sites-enabled/default
+fi
 
 # Test and reload Nginx
 nginx -t
@@ -208,14 +278,21 @@ echo ""
 
 # ---- Step 11: Configure Firewall ----
 echo "🔥 Step 11: Configuring firewall..."
-if command -v ufw &> /dev/null; then
-    ufw allow 80/tcp
-    ufw allow 443/tcp
-    ufw allow 22/tcp
-    ufw --force enable
-    echo "   ✓ Firewall configured (ports 80, 443, 22)"
+if command -v firewall-cmd &> /dev/null; then
+    # Amazon Linux / RHEL firewalld
+    firewall-cmd --permanent --add-port=80/tcp > /dev/null 2>&1 || true
+    firewall-cmd --permanent --add-port=443/tcp > /dev/null 2>&1 || true
+    firewall-cmd --reload > /dev/null 2>&1 || true
+    echo "   ✓ Firewall configured (firewalld)"
+elif command -v ufw &> /dev/null; then
+    # Ubuntu ufw
+    ufw allow 80/tcp > /dev/null 2>&1
+    ufw allow 443/tcp > /dev/null 2>&1
+    ufw allow 22/tcp > /dev/null 2>&1
+    ufw --force enable > /dev/null 2>&1
+    echo "   ✓ Firewall configured (ufw)"
 else
-    echo "   ⚠ UFW not available, skipping firewall setup"
+    echo "   ⚠ No firewall detected, skipping"
 fi
 echo ""
 
@@ -228,7 +305,6 @@ echo "Application Details:"
 echo "  • Install Dir:  $INSTALL_DIR"
 echo "  • Backend:      http://localhost:$BACKEND_PORT"
 echo "  • Frontend:     http://your-vm-ip:$FRONTEND_PORT"
-echo "  • Nginx Config: /etc/nginx/sites-available/weather-analytics"
 echo ""
 echo "Services Status:"
 pm2 status
