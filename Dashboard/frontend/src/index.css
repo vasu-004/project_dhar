@@ -1261,3 +1261,439 @@ body::before {
         flex-direction: column;
     }
 }
+/* ====================================================
+   Home Page Redesign - Modern Card Layout
+   ==================================================== */
+
+/* Home Page Layout */
+.home-page {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 24px;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.home-left-column,
+.home-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Weather Hero Card */
+.weather-hero-card {
+    padding: 32px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+}
+
+.hero-location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.location-icon {
+    font-size: 1.2rem;
+}
+
+.location-name {
+    font-weight: 600;
+}
+
+.hero-weather-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.hero-icon {
+    font-size: 6rem;
+    color: #fbbf24;
+    line-height: 1;
+}
+
+.hero-temp {
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.temp-unit {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.hero-condition {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    text-transform: capitalize;
+}
+
+/* City Tabs */
+.city-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.city-tab {
+    padding: 10px 16px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font);
+}
+
+.city-tab:hover {
+    background: rgba(6, 182, 212, 0.08);
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.city-tab.active {
+    background: rgba(6, 182, 212, 0.15);
+    border-color: rgba(6, 182, 212, 0.5);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+}
+
+.tab-city-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.tab-temp {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Detailed Metrics Grid */
+.detailed-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+/* Forecast Bar */
+.forecast-bar {
+    padding: 24px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.forecast-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.forecast-days {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.forecast-day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.forecast-day-name {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.forecast-day-icon {
+    font-size: 2.5rem;
+    color: #fbbf24;
+}
+
+.forecast-day-temp {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Forecast Chart Container */
+.forecast-chart-container {
+    padding: 20px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+/* Sunrise/Sunset Card */
+.sunrise-sunset-card {
+    padding: 24px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.sun-icon-large {
+    font-size: 5rem;
+    color: #fbbf24;
+    flex-shrink: 0;
+}
+
+.sun-times {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sun-time-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sun-time-icon {
+    font-size: 2rem;
+    color: #f97316;
+}
+
+.sun-time-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.sun-time-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Air Quality Card */
+.air-quality-card {
+    padding: 24px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.air-quality-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.aqi-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.aqi-icon-container {
+    flex-shrink: 0;
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.aqi-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.aqi-value {
+    font-size: 3rem;
+    font-weight: 800;
+    flex: 1;
+    text-align: center;
+}
+
+.aqi-status {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.aqi-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.aqi-metric-item {
+    text-align: center;
+}
+
+.aqi-metric-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.aqi-metric-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Chance of Rain Chart */
+.chance-rain-chart {
+    padding: 24px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.rain-chart-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.rain-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rain-bar-item {
+    display: grid;
+    grid-template-columns: 40px 1fr 120px;
+    gap: 12px;
+    align-items: center;
+}
+
+.rain-bar-day {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.rain-bar-container {
+    position: relative;
+    height: 24px;
+    background: var(--bg-glass);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rain-bar-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    transition: width 0.6s ease;
+}
+
+.rain-bar-value {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+}
+
+.rain-bar-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+/* Responsive - Home Page */
+@media (max-width: 1024px) {
+    .home-page {
+        grid-template-columns: 1fr;
+    }
+
+    .detailed-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .weather-hero-card {
+        padding: 24px;
+    }
+
+    .hero-temp {
+        font-size: 4rem;
+    }
+
+    .hero-icon {
+        font-size: 5rem;
+    }
+
+    .detailed-metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .forecast-days {
+        gap: 4px;
+    }
+
+    .forecast-day-icon {
+        font-size: 2rem;
+    }
+
+    .aqi-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .detailed-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .rain-bar-item {
+        grid-template-columns: 30px 1fr 100px;
+    }
+}
