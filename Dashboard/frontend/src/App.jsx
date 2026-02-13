@@ -22,17 +22,6 @@ function AppContent() {
 
     return (
         <div className="app">
-            {/* Navigation Bar */}
-            <Navbar />
-
-            {/* Connection Status */}
-            <div className="connection-status">
-                <div className={`status-indicator ${connected ? 'online' : 'offline'}`}>
-                    <span className="status-dot"></span>
-                    {connected ? 'Live Connected' : 'Connecting...'}
-                </div>
-            </div>
-
             {/* Routes */}
             <Routes>
                 <Route
@@ -50,28 +39,48 @@ function AppContent() {
                 <Route
                     path="/pipeline"
                     element={
-                        <Pipeline
-                            pipeline={pipeline}
-                            connected={connected}
-                        />
+                        <>
+                            <Navbar />
+                            <div className="connection-status">
+                                <div className={`status-indicator ${connected ? 'online' : 'offline'}`}>
+                                    <span className="status-dot"></span>
+                                    {connected ? 'Live Connected' : 'Connecting...'}
+                                </div>
+                            </div>
+                            <Pipeline
+                                pipeline={pipeline}
+                                connected={connected}
+                            />
+                            <footer className="footer">
+                                <span>WeathX - Weather Analytics Dashboard</span>
+                                <span>Powered by AWS Kinesis + Lambda | OpenWeatherMap</span>
+                            </footer>
+                        </>
                     }
                 />
                 <Route
                     path="/analytics"
                     element={
-                        <Analytics
-                            events={events}
-                            connected={connected}
-                        />
+                        <>
+                            <Navbar />
+                            <div className="connection-status">
+                                <div className={`status-indicator ${connected ? 'online' : 'offline'}`}>
+                                    <span className="status-dot"></span>
+                                    {connected ? 'Live Connected' : 'Connecting...'}
+                                </div>
+                            </div>
+                            <Analytics
+                                events={events}
+                                connected={connected}
+                            />
+                            <footer className="footer">
+                                <span>WeathX - Weather Analytics Dashboard</span>
+                                <span>Powered by AWS Kinesis + Lambda | OpenWeatherMap</span>
+                            </footer>
+                        </>
                     }
                 />
             </Routes>
-
-            {/* Footer */}
-            <footer className="footer">
-                <span>WeathX - Weather Analytics Dashboard</span>
-                <span>Powered by AWS Kinesis + Lambda | OpenWeatherMap</span>
-            </footer>
         </div>
     );
 }
