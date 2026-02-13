@@ -12,7 +12,7 @@ class WeatherFetcher {
     constructor(kinesisStream, options = {}) {
         this.kinesisStream = kinesisStream;
         this.apiKey = options.apiKey || '';
-        this.cities = options.cities || ['Delhi', 'Mumbai', 'Bangalore'];
+        this.cities = options.cities || ['Delhi', 'Mumbai', 'Chennai'];
         this.intervalMs = options.intervalMs || 60000; // 60 seconds
         this.intervalHandle = null;
         this.fetchCount = 0;
@@ -140,7 +140,6 @@ class WeatherFetcher {
         const defaults = {
             'Delhi': { id: 1273294, coord: { lon: 77.22, lat: 28.67 }, baseTemp: 25, baseHumidity: 50 },
             'Mumbai': { id: 1275339, coord: { lon: 72.88, lat: 19.08 }, baseTemp: 30, baseHumidity: 70 },
-            'Bangalore': { id: 1277333, coord: { lon: 77.60, lat: 12.98 }, baseTemp: 24, baseHumidity: 55 },
             'Chennai': { id: 1264527, coord: { lon: 80.27, lat: 13.08 }, baseTemp: 32, baseHumidity: 75 },
             'Kolkata': { id: 1275004, coord: { lon: 88.37, lat: 22.57 }, baseTemp: 28, baseHumidity: 65 },
             'Hyderabad': { id: 1269843, coord: { lon: 78.47, lat: 17.38 }, baseTemp: 27, baseHumidity: 55 }

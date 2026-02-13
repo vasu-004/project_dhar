@@ -20,7 +20,7 @@ const WeatherFetcher = require('./weatherFetcher');
 
 // ---- Configuration ----
 const PORT = process.env.PORT || 5000;
-const CITIES = (process.env.CITIES || 'Delhi,Mumbai,Bangalore,Chennai,Kolkata,Hyderabad')
+const CITIES = (process.env.CITIES || 'Delhi,Mumbai,Chennai,Kolkata,Hyderabad')
     .split(',')
     .map(c => c.trim());
 const API_KEY = process.env.OPENWEATHER_API_KEY || '';
