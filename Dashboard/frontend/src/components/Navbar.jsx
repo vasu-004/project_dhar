@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeProvider';
 
 function Navbar() {
     const { theme, toggleTheme } = useTheme();
+    const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const isActive = (path) => location.pathname === path;
 
     return (
         <nav className="navbar">
@@ -38,9 +42,9 @@ function Navbar() {
 
                 {/* Navigation Links */}
                 <div className={`navbar-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-                    <a href="#home" className="nav-link active">Home</a>
-                    <a href="#analytics" className="nav-link">Analytics</a>
-                    <a href="#about" className="nav-link">About</a>
+                    <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>Home</Link>
+                    <Link to="/pipeline" className={`nav-link ${isActive('/pipeline') ? 'active' : ''}`}>Pipeline</Link>
+                    <Link to="/analytics" className={`nav-link ${isActive('/analytics') ? 'active' : ''}`}>Analytics</Link>
                 </div>
 
                 {/* Theme Toggle & Mobile Menu */}
