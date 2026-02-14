@@ -107,7 +107,7 @@ function Home({
                         </div>
 
                         {/* Hourly Forecast */}
-                        <HourlyForecast history={history} city={mainCity} />
+                        <HourlyForecast history={history} city={mainCity} currentData={currentData} />
 
                         {/* Sunrise/Sunset & Tomorrow */}
                         <div className="sun-tomorrow-row">
