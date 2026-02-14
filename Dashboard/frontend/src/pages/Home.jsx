@@ -4,13 +4,17 @@ import HourlyForecast from '../components/HourlyForecast';
 import TomorrowCard from '../components/TomorrowCard';
 import TodayHighlights from '../components/TodayHighlights';
 import OtherCities from '../components/OtherCities';
+import TemperatureChart from '../components/TemperatureChart';
+import PipelineStatus from '../components/PipelineStatus';
 
 function Home({
     currentData,
     cities,
     selectedCity,
     setSelectedCity,
-    history
+    history,
+    pipeline,
+    connected
 }) {
     const cityData = currentData[selectedCity] || currentData['Coimbatore'] || null;
     const mainCity = selectedCity || 'Coimbatore';
@@ -158,6 +162,15 @@ function Home({
                         {/* Other Cities */}
                         <OtherCities currentData={currentData} cities={cities} />
                     </div>
+                </div>
+
+                {/* Analytics Section */}
+                <div className="analytics-section">
+                    {/* Temperature Trends Chart */}
+                    <TemperatureChart history={history} city={mainCity} />
+
+                    {/* AWS Pipeline Status */}
+                    <PipelineStatus pipeline={pipeline} connected={connected} />
                 </div>
             </div>
         </div>

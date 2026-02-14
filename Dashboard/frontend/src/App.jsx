@@ -33,6 +33,8 @@ function AppContent() {
                             selectedCity={selectedCity}
                             setSelectedCity={setSelectedCity}
                             history={history}
+                            pipeline={pipeline}
+                            connected={connected}
                         />
                     }
                 />
