@@ -4,8 +4,12 @@ import { WiDaySunny, WiSunrise, WiSunset } from 'react-icons/wi';
 function SunriseSunsetCard({ data }) {
     const formatTime = (timestamp) => {
         if (!timestamp) return '--:--';
-        const date = new Date(timestamp * 1000);
-        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        // Handle both ISO strings and Unix timestamps (seconds)
+        const date = typeof timestamp === 'string'
+            ? new Date(timestamp)
+            : new Date(timestamp * 1000);
+        if (isNaN(date.getTime())) return '--:--';
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     };
 
     return (
