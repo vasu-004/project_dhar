@@ -47,12 +47,16 @@ export function useWeatherData() {
                     setPipeline(msg.data.pipeline || null);
 
                     // Add to events log
+                    const eventTime = msg.data.current?.timestamp
+                        ? new Date(msg.data.current.timestamp).toLocaleTimeString()
+                        : new Date().toLocaleTimeString();
+
                     setEvents(prev => [{
                         id: Date.now(),
                         city: msg.data.city,
                         temp: msg.data.current?.temperature,
                         weather: msg.data.current?.weatherDescription,
-                        time: new Date().toLocaleTimeString()
+                        time: eventTime
                     }, ...prev].slice(0, 50));
                 }
             } catch (err) {
