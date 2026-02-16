@@ -2,16 +2,30 @@ import React from 'react';
 import { WiDaySunny, WiCloudy, WiRain, WiThunderstorm, WiFog, WiDayRain } from 'react-icons/wi';
 
 function ForecastBar() {
-    // Mock 7-day forecast data
-    const forecast = [
-        { day: 'Fri', icon: 'sunny', temp: 27 },
-        { day: 'Mon', icon: 'cloudy', temp: 24 },
-        { day: 'Sun', icon: 'rainy', temp: 22 },
-        { day: 'Sun', icon: 'rainy', temp: 21 },
-        { day: 'Thu', icon: 'rainy', temp: 20 },
-        { day: 'Tue', icon: 'sunny', temp: 25 },
-        { day: 'Wed', icon: 'rainy', temp: 23 }
-    ];
+    // Generate 7-day forecast data with real dates
+    const generateForecast = () => {
+        const forecastData = [];
+        const today = new Date();
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const icons = ['sunny', 'cloudy', 'rainy', 'rainy', 'rainy', 'sunny', 'rainy'];
+        const temps = [27, 24, 22, 21, 20, 25, 23];
+        
+        for (let i = 1; i <= 7; i++) {
+            const futureDate = new Date(today);
+            futureDate.setDate(today.getDate() + i);
+            const dayName = daysOfWeek[futureDate.getDay()];
+            
+            forecastData.push({
+                day: dayName,
+                icon: icons[i - 1],
+                temp: temps[i - 1]
+            });
+        }
+        
+        return forecastData;
+    };
+    
+    const forecast = generateForecast();
 
     const getIcon = (type) => {
         switch (type) {

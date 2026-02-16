@@ -1,12 +1,11 @@
 import React from 'react';
 
 function OtherCities({ currentData, cities }) {
-    // Map cities to display names matching the reference
+    // Map cities to display names
     const cityMap = {
-        'Delhi': { display: 'USA', flag: '🇺🇸' },
-        'Mumbai': { display: 'Dubai - UAE', flag: '🇦🇪' },
-        'Bangalore': { display: 'China Nuevo', flag: '🇨🇳' },
-        'Chennai': { display: 'Canada', flag: '🇨🇦' },
+        'Delhi': { display: 'Delhi', flag: '��' },
+        'Mumbai': { display: 'Mumbai', flag: '��' },
+        'Chennai': { display: 'Chennai', flag: '��' },
         'Coimbatore': { display: 'Coimbatore', flag: '🇮🇳' }
     };
 
