@@ -48,8 +48,8 @@ export function useWeatherData() {
 
                     // Add to events log
                     const eventTime = msg.data.current?.timestamp
-                        ? new Date(msg.data.current.timestamp).toLocaleTimeString()
-                        : new Date().toLocaleTimeString();
+                        ? new Date(msg.data.current.timestamp).toLocaleString()
+                        : new Date().toLocaleString();
 
                     setEvents(prev => [{
                         id: Date.now(),
