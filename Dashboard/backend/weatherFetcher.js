@@ -142,7 +142,8 @@ class WeatherFetcher {
             'Mumbai': { id: 1275339, coord: { lon: 72.88, lat: 19.08 }, baseTemp: 30, baseHumidity: 70 },
             'Chennai': { id: 1264527, coord: { lon: 80.27, lat: 13.08 }, baseTemp: 32, baseHumidity: 75 },
             'Kolkata': { id: 1275004, coord: { lon: 88.37, lat: 22.57 }, baseTemp: 28, baseHumidity: 65 },
-            'Hyderabad': { id: 1269843, coord: { lon: 78.47, lat: 17.38 }, baseTemp: 27, baseHumidity: 55 }
+            'Hyderabad': { id: 1269843, coord: { lon: 78.47, lat: 17.38 }, baseTemp: 27, baseHumidity: 55 },
+            'Coimbatore': { id: 1273865, coord: { lon: 76.96, lat: 11.01 }, baseTemp: 30, baseHumidity: 45 }
         };
         return defaults[city] || { id: 9999, coord: { lon: 0, lat: 0 }, baseTemp: 25, baseHumidity: 50 };
     }
