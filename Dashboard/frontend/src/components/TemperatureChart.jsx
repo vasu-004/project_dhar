@@ -5,8 +5,7 @@ import {
 } from 'recharts';
 
 function TemperatureChart({ history, city }) {
-    const cityHistory = history && history[city] ? history[city] : [];
-    const data = cityHistory.map((record, i) => ({
+    const data = history.map((record, i) => ({
         time: new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         temperature: record.temperature,
         feelsLike: record.feelsLike,
