@@ -7,7 +7,7 @@ export function useWeatherData() {
     const [currentData, setCurrentData] = useState({});
     const [cities, setCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
-    const [history, setHistory] = useState([]);
+    const [history, setHistory] = useState({});
     const [pipeline, setPipeline] = useState(null);
     const [connected, setConnected] = useState(false);
     const [events, setEvents] = useState([]);
@@ -34,8 +34,8 @@ export function useWeatherData() {
                     setCurrentData(msg.data.current || {});
                     setCities(msg.data.cities || []);
                     setPipeline(msg.data.pipeline || null);
-                    if (msg.data.cities?.length && !selectedCity) {
-                        setSelectedCity(msg.data.cities[0]);
+                    if (msg.data.cities?.length) {
+                        setSelectedCity(prev => prev || msg.data.cities[0]);
                     }
                 }
 
@@ -73,7 +73,7 @@ export function useWeatherData() {
         ws.onerror = () => {
             ws.close();
         };
-    }, [selectedCity]);
+    }, []);
 
     // Fetch history for selected city
     const fetchHistory = useCallback(async (city) => {
@@ -81,9 +81,9 @@ export function useWeatherData() {
         try {
             const res = await fetch(`${API_BASE}/api/weather/history?city=${encodeURIComponent(city)}&limit=50`);
             const data = await res.json();
-            setHistory(data.records || []);
+            setHistory(prev => ({ ...prev, [city]: data.records || [] }));
         } catch {
-            setHistory([]);
+            setHistory(prev => ({ ...prev, [city]: [] }));
         }
     }, []);
 

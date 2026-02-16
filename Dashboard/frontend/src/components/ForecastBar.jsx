@@ -9,22 +9,22 @@ function ForecastBar() {
         const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const icons = ['sunny', 'cloudy', 'rainy', 'rainy', 'rainy', 'sunny', 'rainy'];
         const temps = [27, 24, 22, 21, 20, 25, 23];
-        
+
         for (let i = 1; i <= 7; i++) {
             const futureDate = new Date(today);
             futureDate.setDate(today.getDate() + i);
             const dayName = daysOfWeek[futureDate.getDay()];
-            
+
             forecastData.push({
-                day: dayName,
+                day: `${dayName} ${futureDate.getDate()}`,
                 icon: icons[i - 1],
                 temp: temps[i - 1]
             });
         }
-        
+
         return forecastData;
     };
-    
+
     const forecast = generateForecast();
 
     const getIcon = (type) => {

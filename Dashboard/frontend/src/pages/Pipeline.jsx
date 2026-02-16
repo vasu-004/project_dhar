@@ -30,7 +30,7 @@ function Pipeline({ pipeline, connected }) {
                     <p className="info-text">WeatherDataStream processes incoming weather data with 2 active shards</p>
                     <div className="info-stat">
                         <span className="stat-label">Records Processed:</span>
-                        <span className="stat-value">{pipeline?.kinesis?.recordCount || 0}</span>
+                        <span className="stat-value">{pipeline?.kinesis?.totalRecordsIngested || 0}</span>
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@ function Pipeline({ pipeline, connected }) {
                     <p className="info-text">DynamoDB table storing historical weather data for analysis</p>
                     <div className="info-stat">
                         <span className="stat-label">Total Records:</span>
-                        <span className="stat-value">{pipeline?.dataStore?.recordCount || 0}</span>
+                        <span className="stat-value">{pipeline?.dataStore?.totalRecordsProcessed || 0}</span>
                     </div>
                 </div>
             </div>

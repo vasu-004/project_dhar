@@ -15,6 +15,7 @@ function Home({
     history
 }) {
     const cityData = currentData[selectedCity] || null;
+    const cityHistory = history[selectedCity] || [];
 
     return (
         <div className="home-page">
@@ -82,7 +83,7 @@ function Home({
 
                 {/* Temperature Forecast Chart */}
                 <div className="forecast-chart-container">
-                    <TemperatureChart history={history} city={selectedCity} />
+                    <TemperatureChart history={cityHistory} city={selectedCity} />
                 </div>
 
                 {/* Sunrise/Sunset */}

@@ -80,7 +80,7 @@ function PipelineStatus({ pipeline, connected }) {
                 <div className="pipeline-metrics">
                     <span>Avg Lambda Duration: <strong>{lambda.averageDurationMs}ms</strong></span>
                     <span>Last Invocation: <strong>{lambda.lastInvocation
-                        ? new Date(lambda.lastInvocation).toLocaleTimeString()
+                        ? new Date(lambda.lastInvocation).toLocaleString()
                         : 'N/A'}</strong></span>
                 </div>
             )}
