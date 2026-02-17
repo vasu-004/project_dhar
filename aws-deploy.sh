@@ -81,52 +81,32 @@ if ! aws sts get-caller-identity &> /dev/null; then
 fi
 echo "   ✓ AWS credentials configured"
 
-# Check and install Node.js
-if ! command -v node &> /dev/null; then
-    echo "   ⚠ Node.js not found, installing..."
+# Check and install Python3 and pip
+if ! command -v python3 &> /dev/null; then
+    echo "   ⚠ Python3 not found, installing..."
     
-    # Detect OS and install accordingly
     if command -v yum &> /dev/null; then
-        # Amazon Linux / Amazon Linux 2023 / RHEL / CentOS / AlmaLinux / Rocky
-        echo "   Installing Node.js 20 (yum-based system)..."
-        
-        # Try modern method first (AL2023, RHEL 9+)
-        if ! curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - > /dev/null 2>&1; then
-            echo "   Using alternative method..."
-            # Fallback for older systems
-            yum install -y https://rpm.nodesource.com/pub_20.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm 2>/dev/null || true
-        fi
-        
-        yum install -y nodejs > /dev/null 2>&1
-        
+        yum install -y python3 python3-pip > /dev/null 2>&1
     elif command -v apt-get &> /dev/null; then
-        # Debian / Ubuntu
-        echo "   Installing Node.js 20 (apt-based system)..."
-        curl -fsSL https://deb.nodesource.com/setup_20.x | bash - > /dev/null 2>&1
-        apt-get install -y nodejs > /dev/null 2>&1
-    else
-        echo "   ❌ Could not detect package manager (yum/apt-get)."
-        echo "   Please install Node.js 20 manually: https://nodejs.org/"
-        exit 1
+        apt-get install -y python3 python3-pip > /dev/null 2>&1
     fi
     
-    if command -v node &> /dev/null; then
-        echo "   ✓ Node.js installed: $(node -v)"
+    if command -v python3 &> /dev/null; then
+        echo "   ✓ Python3 installed: $(python3 --version)"
     else
-        echo "   ❌ Node.js installation failed"
-        echo "   Please install manually: https://nodejs.org/"
+        echo "   ❌ Python3 installation failed"
         exit 1
     fi
 else
-    echo "   ✓ Node.js found: $(node -v)"
+    echo "   ✓ Python3 found: $(python3 --version)"
 fi
 
-# Check and install npm
-if ! command -v npm &> /dev/null; then
-    echo "   ❌ npm not found (should come with Node.js)"
+# Check pip
+if ! command -v pip &> /dev/null && ! command -v pip3 &> /dev/null; then
+    echo "   ❌ pip not found"
     exit 1
 fi
-echo "   ✓ npm found: $(npm -v)"
+echo "   ✓ pip found"
 
 # Check and install zip
 if ! command -v zip &> /dev/null; then
@@ -285,74 +265,121 @@ echo "   ✓ Policies attached"
 echo ""
 
 # ---- 4. Package Lambda Function ----
-echo "📦 Packaging Lambda function..."
+echo "📦 Packaging Lambda function (Python)..."
 cd Dashboard/backend
 
-# Create deployment package
+# Create deployment package directory
 mkdir -p lambda-package
-cp lambdaProcessor.js lambda-package/
-cp dataStore.js lambda-package/
 
-# Create Lambda handler
-cat > lambda-package/index.js <<'EOF'
-// AWS Lambda Handler for Weather Data Processor
-const LambdaProcessor = require('./lambdaProcessor');
-const { DynamoDBClient, PutItemCommand } = require('@aws-sdk/client-dynamodb');
+# Create Python Lambda handler
+cat > lambda-package/lambda_function.py <<'EOF'
+"""
+AWS Lambda Handler for Weather Data Processor
+Processes Kinesis records and stores them in DynamoDB
+"""
+import json
+import base64
+import os
+from datetime import datetime
+import boto3
+from decimal import Decimal
 
-const dynamodb = new DynamoDBClient({});
-const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
+dynamodb = boto3.resource('dynamodb')
+table_name = os.environ['DYNAMODB_TABLE_NAME']
+table = dynamodb.Table(table_name)
 
-// Simplified DataStore for AWS (writes to DynamoDB)
-class DynamoDataStore {
-  async put(cityName, record) {
-    const params = {
-      TableName: TABLE_NAME,
-      Item: {
-        city: { S: cityName },
-        timestamp: { S: record.timestamp },
-        data: { S: JSON.stringify(record) }
-      }
-    };
-    await dynamodb.send(new PutItemCommand(params));
-  }
-}
 
-exports.handler = async (event) => {
-  const dataStore = new DynamoDataStore();
-  
-  for (const record of event.Records) {
-    const payload = JSON.parse(Buffer.from(record.kinesis.data, 'base64').toString());
+def transform_weather_data(raw_data, city):
+    """Transform OpenWeatherMap API data into our format."""
+    main = raw_data.get('main', {})
+    weather = raw_data.get('weather', [{}])[0]
+    wind = raw_data.get('wind', {})
+    sys_data = raw_data.get('sys', {})
+    coords = raw_data.get('coord', {})
     
-    // Transform using same logic as local simulator
-    const processor = new LambdaProcessor(null, dataStore);
-    const processed = processor._transformWeatherData(payload);
+    # Convert floats to Decimal for DynamoDB
+    def to_decimal(value, decimals=1):
+        if value is None:
+            return None
+        return Decimal(str(round(value, decimals)))
     
-    await dataStore.put(processed.city, processed);
-    console.log(`Processed: ${processed.city} | Temp: ${processed.temperature}°C`);
-  }
-  
-  return { statusCode: 200, body: 'OK' };
-};
+    return {
+        'city': city,
+        'temperature': to_decimal(main.get('temp', 0)),
+        'feelsLike': to_decimal(main.get('feels_like', 0)),
+        'tempMin': to_decimal(main.get('temp_min', 0)),
+        'tempMax': to_decimal(main.get('temp_max', 0)),
+        'pressure': main.get('pressure', 0),
+        'humidity': main.get('humidity', 0),
+        'visibility': raw_data.get('visibility', 0),
+        'windSpeed': to_decimal(wind.get('speed', 0)),
+        'windDeg': wind.get('deg', 0),
+        'windGust': to_decimal(wind.get('gust')) if wind.get('gust') else None,
+        'cloudiness': raw_data.get('clouds', {}).get('all', 0),
+        'weatherMain': weather.get('main', 'Unknown'),
+        'weatherDescription': weather.get('description', 'unknown'),
+        'weatherIcon': weather.get('icon', '01d'),
+        'sunrise': sys_data.get('sunrise'),
+        'sunset': sys_data.get('sunset'),
+        'timezone': raw_data.get('timezone', 0),
+        'latitude': to_decimal(coords.get('lat', 0), 6),
+        'longitude': to_decimal(coords.get('lon', 0), 6),
+        'timestamp': raw_data.get('dt', int(datetime.now().timestamp())),
+        'processedAt': datetime.now().isoformat()
+    }
+
+
+def lambda_handler(event, context):
+    """Process Kinesis records and store in DynamoDB."""
+    processed_count = 0
+    
+    for record in event['Records']:
+        try:
+            # Decode Kinesis data
+            payload = json.loads(base64.b64decode(record['kinesis']['data']))
+            partition_key = record['kinesis']['partitionKey']
+            
+            # Transform data
+            transformed = transform_weather_data(payload, partition_key)
+            
+            # Store in DynamoDB
+            table.put_item(Item={
+                'city': transformed['city'],
+                'timestamp': str(transformed['timestamp']),
+                'data': transformed
+            })
+            
+            processed_count += 1
+            print(f"Processed: {transformed['city']} | Temp: {transformed['temperature']}°C")
+            
+        except Exception as e:
+            print(f"Error processing record: {e}")
+            raise
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps(f'Processed {processed_count} records')
+    }
 EOF
 
-# Install dependencies
-echo "   Installing AWS SDK dependencies..."
-if npm install --production --prefix lambda-package @aws-sdk/client-dynamodb 2>&1 | grep -v "^npm WARN" | grep -v "^$"; then
-    echo "   ✓ Dependencies installed successfully"
-else
-    # Check if node_modules exists anyway (install might have succeeded despite warnings)
-    if [ -d "lambda-package/node_modules/@aws-sdk" ]; then
-        echo "   ✓ Dependencies installed (with warnings)"
-    else
-        echo "   ❌ Failed to install dependencies"
-        exit 1
-    fi
-fi
+# Create requirements.txt for Lambda dependencies
+cat > lambda-package/requirements.txt <<'EOF'
+boto3>=1.34.0
+EOF
 
-# Create ZIP
+# Install dependencies into the package directory
+echo "   Installing Python dependencies..."
+pip install -r lambda-package/requirements.txt -t lambda-package/ --quiet
+
+# Create ZIP package
+echo "   Creating deployment package..."
 cd lambda-package
-zip -r ../lambda-function.zip . > /dev/null
+zip -r ../lambda-function.zip . > /dev/null 2>&1
 cd ..
+
+# Clean up
+rm -rf lambda-package
+
 echo "   ✓ Lambda package created: lambda-function.zip"
 echo ""
 
@@ -374,14 +401,16 @@ if aws lambda get-function --function-name "$LAMBDA_FUNCTION_NAME" --region "$AW
     
     aws lambda update-function-configuration \
         --function-name "$LAMBDA_FUNCTION_NAME" \
+        --runtime python3.12 \
+        --handler lambda_function.lambda_handler \
         --environment "Variables={DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME}" \
         --region "$AWS_REGION" > /dev/null
 else
     aws lambda create-function \
         --function-name "$LAMBDA_FUNCTION_NAME" \
-        --runtime nodejs20.x \
+        --runtime python3.12 \
         --role "$LAMBDA_ROLE_ARN" \
-        --handler index.handler \
+        --handler lambda_function.lambda_handler \
         --zip-file fileb://lambda-function.zip \
         --timeout 60 \
         --memory-size 256 \
