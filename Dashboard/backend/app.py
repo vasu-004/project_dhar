@@ -31,8 +31,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'weather-dashboard-secret-key')
 CORS(app)
 
-# Initialize SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+# Initialize SocketIO (using threading mode for Python 3.12 compatibility)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # ---- Initialize AWS-Simulated Pipeline ----
 print('═══════════════════════════════════════════════════')
