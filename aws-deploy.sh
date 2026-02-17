@@ -405,7 +405,8 @@ sleep 10
 
 LAMBDA_ROLE_ARN="arn:aws:iam::$AWS_ACCOUNT_ID:role/$LAMBDA_ROLE_NAME"
 
-if aws lambda get-function --function-name "$LAMBDA_FUNCTION_NAME" --region "$AWS_REGION" 2>/dev/null; then
+# Check if function exists
+if aws lambda get-function --function-name "$LAMBDA_FUNCTION_NAME" --region "$AWS_REGION" > /dev/null 2>&1; then
     echo "   Function exists, updating code..."
     aws lambda update-function-code \
         --function-name "$LAMBDA_FUNCTION_NAME" \
@@ -421,7 +422,8 @@ if aws lambda get-function --function-name "$LAMBDA_FUNCTION_NAME" --region "$AW
     
     echo "   ✓ Lambda function updated"
 else
-    aws lambda create-function \
+    # Try to create function
+    if aws lambda create-function \
         --function-name "$LAMBDA_FUNCTION_NAME" \
         --runtime python3.12 \
         --role "$LAMBDA_ROLE_ARN" \
@@ -430,13 +432,30 @@ else
         --timeout 60 \
         --memory-size 256 \
         --environment "Variables={DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME}" \
-        --region "$AWS_REGION" > /dev/null
-    
-    echo "   ✓ Lambda function created"
-    
-    # Only wait for new deployments (wait can hang on updates)
-    echo "   Waiting for function to become active..."
-    aws lambda wait function-active --function-name "$LAMBDA_FUNCTION_NAME" --region "$AWS_REGION" 2>/dev/null || echo "   ⚠ Wait timed out, but function may still be deploying"
+        --region "$AWS_REGION" > /dev/null 2>&1; then
+        
+        echo "   ✓ Lambda function created"
+        
+        # Only wait for new deployments (wait can hang on updates)
+        echo "   Waiting for function to become active..."
+        aws lambda wait function-active --function-name "$LAMBDA_FUNCTION_NAME" --region "$AWS_REGION" 2>/dev/null || echo "   ⚠ Wait timed out, but function may still be deploying"
+    else
+        # If create failed (e.g., function already exists), try update
+        echo "   Function already exists, updating instead..."
+        aws lambda update-function-code \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --zip-file fileb://lambda-function.zip \
+            --region "$AWS_REGION" > /dev/null 2>&1
+        
+        aws lambda update-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --runtime python3.12 \
+            --handler lambda_function.lambda_handler \
+            --environment "Variables={DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME}" \
+            --region "$AWS_REGION" > /dev/null 2>&1
+        
+        echo "   ✓ Lambda function updated"
+    fi
 fi
 echo ""
 
