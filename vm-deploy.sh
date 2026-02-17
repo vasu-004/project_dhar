@@ -120,7 +120,15 @@ echo ""
 echo "📦 Step 5: Setting up Python virtual environment..."
 cd $INSTALL_DIR/backend
 
-if [ ! -d "venv" ]; then
+# Check if venv is complete (has activation script), not just if directory exists
+if [ ! -f "venv/bin/activate" ]; then
+    # Remove incomplete venv if it exists
+    if [ -d "venv" ]; then
+        echo "   Removing incomplete virtual environment..."
+        rm -rf venv
+    fi
+    
+    echo "   Creating virtual environment..."
     if python3 -m venv venv 2>&1 | tee /tmp/venv-error.log; then
         echo "   ✓ Virtual environment created"
     else
@@ -139,15 +147,18 @@ if [ ! -d "venv" ]; then
         fi
         
         # Retry venv creation
+        rm -rf venv  # Clean up failed attempt
         python3 -m venv venv
+        
+        # Final check
+        if [ ! -f "venv/bin/activate" ]; then
+            echo "   ❌ Virtual environment creation failed!"
+            exit 1
+        fi
         echo "   ✓ Virtual environment created (after package installation)"
     fi
-fi
-
-if [ ! -f "venv/bin/activate" ]; then
-    echo "   ❌ Virtual environment activation script not found!"
-    echo "   Path checked: $INSTALL_DIR/backend/venv/bin/activate"
-    exit 1
+else
+    echo "   ✓ Virtual environment already exists"
 fi
 
 source venv/bin/activate
