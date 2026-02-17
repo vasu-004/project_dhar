@@ -121,8 +121,33 @@ echo "📦 Step 5: Setting up Python virtual environment..."
 cd $INSTALL_DIR/backend
 
 if [ ! -d "venv" ]; then
-    python3 -m venv venv
-    echo "   ✓ Virtual environment created"
+    if python3 -m venv venv 2>&1 | tee /tmp/venv-error.log; then
+        echo "   ✓ Virtual environment created"
+    else
+        echo "   ❌ Failed to create virtual environment"
+        cat /tmp/venv-error.log
+        echo ""
+        echo "   Trying to install missing packages..."
+        
+        # Get Python version (e.g., 3.12)
+        PYTHON_VER=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
+        
+        if [ "$PKG_MGR" = "apt" ]; then
+            apt-get install -y python${PYTHON_VER}-venv python3-venv
+        elif [ "$PKG_MGR" = "yum" ]; then
+            yum install -y python3-devel
+        fi
+        
+        # Retry venv creation
+        python3 -m venv venv
+        echo "   ✓ Virtual environment created (after package installation)"
+    fi
+fi
+
+if [ ! -f "venv/bin/activate" ]; then
+    echo "   ❌ Virtual environment activation script not found!"
+    echo "   Path checked: $INSTALL_DIR/backend/venv/bin/activate"
+    exit 1
 fi
 
 source venv/bin/activate
