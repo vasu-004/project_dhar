@@ -286,7 +286,7 @@ echo ""
 
 # ---- 4. Package Lambda Function ----
 echo "📦 Packaging Lambda function..."
-cd backend
+cd Dashboard/backend
 
 # Create deployment package
 mkdir -p lambda-package
@@ -418,7 +418,7 @@ else
     echo "   ✓ Event source mapping created"
 fi
 
-cd ..
+cd ../..
 echo ""
 
 # ---- Summary ----
