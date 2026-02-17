@@ -101,12 +101,25 @@ else
     echo "   ✓ Python3 found: $(python3 --version)"
 fi
 
-# Check pip
+# Check and install pip
 if ! command -v pip &> /dev/null && ! command -v pip3 &> /dev/null; then
-    echo "   ❌ pip not found"
-    exit 1
+    echo "   ⚠ pip not found, installing..."
+    
+    if command -v yum &> /dev/null; then
+        yum install -y python3-pip > /dev/null 2>&1
+    elif command -v apt-get &> /dev/null; then
+        apt-get install -y python3-pip > /dev/null 2>&1
+    fi
+    
+    if command -v pip &> /dev/null || command -v pip3 &> /dev/null; then
+        echo "   ✓ pip installed"
+    else
+        echo "   ❌ pip installation failed"
+        exit 1
+    fi
+else
+    echo "   ✓ pip found"
 fi
-echo "   ✓ pip found"
 
 # Check and install zip
 if ! command -v zip &> /dev/null; then
