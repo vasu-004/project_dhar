@@ -183,7 +183,7 @@ def on_kinesis_record(record):
         'timestamp': datetime.now().isoformat()
     }
     
-    socketio.emit('WEATHER_UPDATE', message, broadcast=True)
+    socketio.emit('WEATHER_UPDATE', message)
 
 
 # Subscribe to Kinesis events for broadcasting
@@ -204,4 +204,4 @@ if __name__ == '__main__':
     weather_fetcher.start()
     
     # Run the Flask-SocketIO server
-    socketio.run(app, host='0.0.0.0', port=PORT, debug=False)
+    socketio.run(app, host='0.0.0.0', port=PORT, debug=False, allow_unsafe_werkzeug=True)
