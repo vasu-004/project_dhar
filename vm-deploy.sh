@@ -60,6 +60,15 @@ echo ""
 echo "📦 Step 2: Installing Python ${PYTHON_VERSION}..."
 if command -v python3 &> /dev/null; then
     echo "   ✓ Python3 already installed: $(python3 --version)"
+    
+    # Ensure venv package is installed on Ubuntu/Debian systems
+    if [ "$PKG_MGR" = "apt" ]; then
+        PYTHON_VER=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
+        if ! dpkg -l | grep -q "python${PYTHON_VER}-venv"; then
+            echo "   Installing python${PYTHON_VER}-venv package..."
+            $PKG_INSTALL python${PYTHON_VER}-venv > /dev/null 2>&1
+        fi
+    fi
 else
     if [ "$PKG_MGR" = "yum" ]; then
         $PKG_INSTALL python3 python3-pip python3-devel > /dev/null 2>&1
