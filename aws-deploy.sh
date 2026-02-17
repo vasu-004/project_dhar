@@ -32,12 +32,54 @@ echo ""
 # ---- Check and Install Prerequisites ----
 echo "🔍 Checking prerequisites..."
 
-# Check AWS CLI
+# Check and install AWS CLI
 if ! command -v aws &> /dev/null; then
-    echo "❌ AWS CLI not found. Please install: https://aws.amazon.com/cli/"
-    exit 1
+    echo "   ⚠ AWS CLI not found, installing..."
+    
+    # Install AWS CLI v2
+    echo "   Installing AWS CLI v2..."
+    cd /tmp
+    curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    
+    # Ensure unzip is available
+    if ! command -v unzip &> /dev/null; then
+        if command -v yum &> /dev/null; then
+            yum install -y unzip > /dev/null 2>&1
+        elif command -v apt-get &> /dev/null; then
+            apt-get install -y unzip > /dev/null 2>&1
+        fi
+    fi
+    
+    unzip -q awscliv2.zip
+    ./aws/install > /dev/null 2>&1
+    rm -rf awscliv2.zip aws
+    cd - > /dev/null
+    
+    if command -v aws &> /dev/null; then
+        echo "   ✓ AWS CLI installed: $(aws --version)"
+    else
+        echo "   ❌ AWS CLI installation failed"
+        echo "   Please install manually: https://aws.amazon.com/cli/"
+        exit 1
+    fi
+else
+    echo "   ✓ AWS CLI found: $(aws --version)"
 fi
-echo "   ✓ AWS CLI found"
+
+# Check AWS credentials
+echo "   Checking AWS credentials..."
+if ! aws sts get-caller-identity &> /dev/null; then
+    echo ""
+    echo "   ⚠ AWS credentials not configured!"
+    echo "   Please run: aws configure"
+    echo "   You'll need:"
+    echo "     - AWS Access Key ID"
+    echo "     - AWS Secret Access Key"
+    echo "     - Default region: $AWS_REGION"
+    echo ""
+    read -p "   Press Enter after configuring AWS credentials..." 
+fi
+echo "   ✓ AWS credentials configured"
 
 # Check and install Node.js
 if ! command -v node &> /dev/null; then
