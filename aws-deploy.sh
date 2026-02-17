@@ -418,6 +418,8 @@ if aws lambda get-function --function-name "$LAMBDA_FUNCTION_NAME" --region "$AW
         --handler lambda_function.lambda_handler \
         --environment "Variables={DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME}" \
         --region "$AWS_REGION" > /dev/null
+    
+    echo "   ✓ Lambda function updated"
 else
     aws lambda create-function \
         --function-name "$LAMBDA_FUNCTION_NAME" \
@@ -429,11 +431,13 @@ else
         --memory-size 256 \
         --environment "Variables={DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME}" \
         --region "$AWS_REGION" > /dev/null
-    echo "   ✓ Lambda function deployed"
+    
+    echo "   ✓ Lambda function created"
+    
+    # Only wait for new deployments (wait can hang on updates)
+    echo "   Waiting for function to become active..."
+    aws lambda wait function-active --function-name "$LAMBDA_FUNCTION_NAME" --region "$AWS_REGION" 2>/dev/null || echo "   ⚠ Wait timed out, but function may still be deploying"
 fi
-
-# Wait for function to be ready
-aws lambda wait function-active --function-name "$LAMBDA_FUNCTION_NAME" --region "$AWS_REGION"
 echo ""
 
 # ---- 6. Create Event Source Mapping (Kinesis → Lambda) ----
