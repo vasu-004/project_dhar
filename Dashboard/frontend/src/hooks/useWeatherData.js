@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+// Dynamic URLs - works in development (localhost) and production (VM IP)
+const API_BASE = import.meta.env.DEV
+    ? 'http://localhost:5000'
+    : window.location.protocol + '//' + window.location.hostname;
 
-const API_BASE = 'http://localhost:5000';
-const WS_URL = 'ws://localhost:5000';
+const WS_URL = import.meta.env.DEV
+    ? 'ws://localhost:5000'
+    : (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.hostname;
 
 export function useWeatherData() {
     const [currentData, setCurrentData] = useState({});
