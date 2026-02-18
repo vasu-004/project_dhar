@@ -418,11 +418,13 @@ body::before {
 }
 
 .metric-title {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--text-secondary);
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.2px;
+    /* Reduced from 0.8px to prevent truncation */
+    white-space: nowrap;
 }
 
 .metric-value {
@@ -1412,8 +1414,9 @@ body::before {
 /* Detailed Metrics Grid */
 .detailed-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* Prevent overflow */
+    gap: 10px;
 }
 
 /* Forecast Bar */
@@ -2467,7 +2470,9 @@ body::before {
     .temp-value {
         font-size: 3.5rem;
     }
-}/* ====================================================
+}
+
+/* ====================================================
    ANALYTICS SECTION - Temperature Chart & Pipeline
    ==================================================== */
 
