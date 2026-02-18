@@ -8,6 +8,30 @@ function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const isActive = (path) => location.pathname === path;
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    React.useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatDate = (date) => {
+        return date.toLocaleDateString('en-US', {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
+
+    const formatTime = (date) => {
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+    };
 
     return (
         <nav className="navbar">
@@ -38,6 +62,12 @@ function Navbar() {
                             <p className="logo-subtitle">Weather Analytics Dashboard</p>
                         </div>
                     </div>
+                </div>
+
+                {/* Live Date & Time */}
+                <div className="navbar-datetime">
+                    <span className="nav-date">{formatDate(currentTime)}</span>
+                    <span className="nav-time">{formatTime(currentTime)}</span>
                 </div>
 
                 {/* Navigation Links */}

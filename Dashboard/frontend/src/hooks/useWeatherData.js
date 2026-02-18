@@ -4,11 +4,11 @@ import { io } from 'socket.io-client';
 // Dynamic URLs - works in development (localhost) and production (VM IP)
 const API_BASE = import.meta.env.DEV
     ? 'http://localhost:5000'
-    : window.location.protocol + '//' + window.location.hostname + ':5000';
+    : window.location.origin; // Use Nginx proxy (port 80)
 
 const SOCKET_URL = import.meta.env.DEV
     ? 'http://localhost:5000'
-    : window.location.protocol + '//' + window.location.hostname + ':5000';
+    : window.location.origin; // Use Nginx proxy (port 80)
 
 export function useWeatherData() {
     const [currentData, setCurrentData] = useState({});
@@ -24,11 +24,13 @@ export function useWeatherData() {
     const connectSocket = useCallback(() => {
         if (socketRef.current?.connected) return;
 
+        console.log('[Socket.IO] Connecting to:', SOCKET_URL);
         const socket = io(SOCKET_URL, {
             reconnectionAttempts: 8,
             reconnectionDelay: 2000,
             transports: ['polling', 'websocket'], // Smooth upgrade path
-            forceNew: true
+            forceNew: true,
+            path: '/socket.io' // Explicit path for Nginx proxy
         });
         socketRef.current = socket;
 
@@ -47,11 +49,15 @@ export function useWeatherData() {
         });
 
         socket.on('INIT', (msg) => {
+            console.log('[Socket.IO] Received INIT:', msg);
+            const receivedCities = msg.data.cities || [];
             setCurrentData(msg.data.current || {});
-            setCities(msg.data.cities || []);
+            setCities(receivedCities);
             setPipeline(msg.data.pipeline || null);
-            if (msg.data.cities?.length && !selectedCity) {
-                setSelectedCity(msg.data.cities[0]);
+
+            // Set initial city if none selected
+            if (receivedCities.length > 0) {
+                setSelectedCity(prev => prev || receivedCities[0]);
             }
         });
 

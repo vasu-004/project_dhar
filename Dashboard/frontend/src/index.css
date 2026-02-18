@@ -119,6 +119,27 @@ body::before {
     gap: 24px;
 }
 
+/* New Date/Time Styles */
+.navbar-datetime {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.nav-date {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.nav-time {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #8B5CF6;
+    font-family: 'Courier New', monospace;
+}
+
 .navbar-brand {
     display: flex;
     align-items: center;
