@@ -9,7 +9,6 @@ import { FiFilter, FiCalendar, FiClock, FiRefreshCw } from 'react-icons/fi';
 const CHART_TYPES = [
     { id: 'area', name: 'Area', icon: '📈' },
     { id: 'bar', name: 'Bar', icon: '📊' },
-    { id: 'scatter', name: 'Scatter', icon: '🎯' },
     { id: 'pie', name: 'Pie', icon: '🥧' },
     { id: 'bubble', name: 'Bubble', icon: '🫧' }
 ];
@@ -19,41 +18,6 @@ const COLORS = ['#f97316', '#a855f7', '#06b6d4', '#22c55e', '#eab308'];
 function TemperatureChart({ history, city, fetchHistory }) {
     const [chartType, setChartType] = useState('area');
 
-    // Filter State
-    const [startDate, setStartDate] = useState('');
-    const [startTime, setStartTime] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [endTime, setEndTime] = useState('');
-    const [isFiltering, setIsFiltering] = useState(false);
-
-    const handleApplyFilters = () => {
-        let startTs = null;
-        let endTs = null;
-
-        if (startDate) {
-            const start = new Date(`${startDate}T${startTime || '00:00'}`);
-            startTs = start.getTime() / 1000;
-        }
-
-        if (endDate) {
-            const end = new Date(`${endDate}T${endTime || '23:59'}`);
-            endTs = end.getTime() / 1000;
-        }
-
-        if (fetchHistory) {
-            fetchHistory(city, { start: startTs, end: endTs });
-            setIsFiltering(true);
-        }
-    };
-
-    const handleResetFilters = () => {
-        setStartDate('');
-        setStartTime('');
-        setEndDate('');
-        setEndTime('');
-        setIsFiltering(false);
-        if (fetchHistory) fetchHistory(city);
-    };
 
     // Data transformation for different charts
     const chartData = history.map((record, i) => ({
@@ -121,17 +85,6 @@ function TemperatureChart({ history, city, fetchHistory }) {
                     </BarChart>
                 );
 
-            case 'scatter':
-                return (
-                    <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                        <XAxis type="number" dataKey="temperature" name="Temp" unit="°C" stroke="rgba(255,255,255,0.4)" />
-                        <YAxis type="number" dataKey="humidity" name="Humidity" unit="%" stroke="rgba(255,255,255,0.4)" />
-                        <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<CustomTooltip />} />
-                        <Legend wrapperStyle={{ fontSize: 11 }} />
-                        <Scatter name="Temp vs Humidity" data={chartData} fill="#a855f7" />
-                    </ScatterChart>
-                );
 
             case 'pie':
                 const pieData = getPieData();
@@ -210,27 +163,6 @@ function TemperatureChart({ history, city, fetchHistory }) {
                 </div>
             </div>
 
-            {/* Inline Filter Toolbar */}
-            <div className="chart-filter-toolbar">
-                <div className="filter-group">
-                    <label><FiCalendar /> Start</label>
-                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
-                </div>
-                <div className="filter-group">
-                    <label><FiClock /> End</label>
-                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
-                </div>
-                <div className="filter-actions">
-                    <button className="btn-filter apply" onClick={handleApplyFilters}>
-                        <FiFilter /> Apply
-                    </button>
-                    <button className="btn-filter reset" onClick={handleResetFilters}>
-                        <FiRefreshCw /> Reset
-                    </button>
-                </div>
-            </div>
 
             <ResponsiveContainer width="100%" height={320}>
                 {renderChart()}

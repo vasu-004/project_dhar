@@ -47,29 +47,52 @@ function PipelineStatus({ pipeline, connected }) {
     ];
 
     return (
-        <div className="pipeline-container">
-            <h3 className="section-title">
-                🔗 AWS Pipeline Status
-                <span className={`connection-badge ${connected ? 'online' : 'offline'}`}>
-                    {connected ? '● Live' : '○ Offline'}
-                </span>
-            </h3>
+        <div className="pipeline-container creative-pipeline">
+            <div className="cyber-header">
+                <h3 className="section-title">
+                    <span className="cyber-icon">🔗</span> AWS Real-time Pipeline
+                    <span className={`connection-badge modern ${connected ? 'online' : 'offline'}`}>
+                        {connected ? 'SYSTEM ACTIVE' : 'CONNECTION LOST'}
+                    </span>
+                </h3>
+                <div className="cyber-line"></div>
+            </div>
 
-            <div className="pipeline-flow">
+            <div className="pipeline-flow-creative">
                 {stages.map((stage, i) => (
                     <React.Fragment key={stage.name}>
-                        <div className={`pipeline-stage ${stage.status}`}>
-                            <div className="stage-icon">{stage.icon}</div>
-                            <div className="stage-info">
-                                <div className="stage-name">{stage.name}</div>
-                                <div className="stage-subtitle">{stage.subtitle}</div>
-                                <div className="stage-stats">{stage.stats}</div>
+                        <div className={`pipeline-node ${stage.status}`}>
+                            <div className="node-glow"></div>
+                            <div className="node-content">
+                                <div className="node-icon-hex">
+                                    <span className="hex-bg"></span>
+                                    <span className="hex-icon">{stage.icon}</span>
+                                </div>
+                                <div className="node-info">
+                                    <div className="node-name">{stage.name}</div>
+                                    <div className="node-subtitle">{stage.subtitle}</div>
+                                    <div className="node-stats">{stage.stats}</div>
+                                </div>
                             </div>
-                            <div className={`stage-indicator ${stage.status}`}></div>
+                            <div className={`node-status-marker ${stage.status}`}>
+                                <div className="marker-dot"></div>
+                                <span className="marker-text">{stage.status.toUpperCase()}</span>
+                            </div>
+                            <div className="node-decoration">
+                                <span className="corner tl"></span>
+                                <span className="corner tr"></span>
+                                <span className="corner bl"></span>
+                                <span className="corner br"></span>
+                            </div>
                         </div>
                         {i < stages.length - 1 && (
-                            <div className="pipeline-arrow">
-                                <span>→</span>
+                            <div className={`pipeline-connector ${stage.status === 'active' ? 'active' : ''}`}>
+                                <div className="connector-line"></div>
+                                <div className="data-pulses">
+                                    <span className="pulse"></span>
+                                    <span className="pulse"></span>
+                                    <span className="pulse"></span>
+                                </div>
                             </div>
                         )}
                     </React.Fragment>
@@ -77,11 +100,21 @@ function PipelineStatus({ pipeline, connected }) {
             </div>
 
             {lambda.averageDurationMs !== undefined && (
-                <div className="pipeline-metrics">
-                    <span>Avg Lambda Duration: <strong>{lambda.averageDurationMs}ms</strong></span>
-                    <span>Last Invocation: <strong>{lambda.lastInvocation
-                        ? new Date(lambda.lastInvocation).toLocaleTimeString()
-                        : 'N/A'}</strong></span>
+                <div className="pipeline-system-metrics">
+                    <div className="metric-box">
+                        <span className="label">LATENCY</span>
+                        <span className="value">{lambda.averageDurationMs}ms</span>
+                    </div>
+                    <div className="metric-box">
+                        <span className="label">LAST SYNC</span>
+                        <span className="value">
+                            {lambda.lastInvocation ? new Date(lambda.lastInvocation).toLocaleTimeString() : 'N/A'}
+                        </span>
+                    </div>
+                    <div className="metric-box status">
+                        <span className="label">PROTOCOL</span>
+                        <span className="value">WSS / KINESIS</span>
+                    </div>
                 </div>
             )}
         </div>
