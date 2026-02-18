@@ -418,13 +418,14 @@ body::before {
 }
 
 .metric-title {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--text-secondary);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.2px;
-    /* Reduced from 0.8px to prevent truncation */
-    white-space: nowrap;
+    letter-spacing: 0.1px;
+    line-height: 1.2;
+    word-break: break-word;
+    /* Allow wrapping if absolutely necessary */
 }
 
 .metric-value {
@@ -1294,7 +1295,8 @@ body::before {
 /* Home Page Layout */
 .home-page {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 460px 1fr;
+    /* Increased from 400px to give metrics more room */
     gap: 24px;
     max-width: 1440px;
     margin: 0 auto;
