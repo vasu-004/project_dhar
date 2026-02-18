@@ -4,6 +4,7 @@ import {
     ResponsiveContainer, Legend, BarChart, Bar, PieChart, Pie, Cell,
     ScatterChart, Scatter, ZAxis, LineChart, Line
 } from 'recharts';
+import { FiFilter, FiCalendar, FiClock, FiRefreshCw } from 'react-icons/fi';
 
 const CHART_TYPES = [
     { id: 'area', name: 'Area', icon: '📈' },
@@ -15,8 +16,44 @@ const CHART_TYPES = [
 
 const COLORS = ['#f97316', '#a855f7', '#06b6d4', '#22c55e', '#eab308'];
 
-function TemperatureChart({ history, city }) {
+function TemperatureChart({ history, city, fetchHistory }) {
     const [chartType, setChartType] = useState('area');
+
+    // Filter State
+    const [startDate, setStartDate] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [endTime, setEndTime] = useState('');
+    const [isFiltering, setIsFiltering] = useState(false);
+
+    const handleApplyFilters = () => {
+        let startTs = null;
+        let endTs = null;
+
+        if (startDate) {
+            const start = new Date(`${startDate}T${startTime || '00:00'}`);
+            startTs = start.getTime() / 1000;
+        }
+
+        if (endDate) {
+            const end = new Date(`${endDate}T${endTime || '23:59'}`);
+            endTs = end.getTime() / 1000;
+        }
+
+        if (fetchHistory) {
+            fetchHistory(city, { start: startTs, end: endTs });
+            setIsFiltering(true);
+        }
+    };
+
+    const handleResetFilters = () => {
+        setStartDate('');
+        setStartTime('');
+        setEndDate('');
+        setEndTime('');
+        setIsFiltering(false);
+        if (fetchHistory) fetchHistory(city);
+    };
 
     // Data transformation for different charts
     const chartData = history.map((record, i) => ({
@@ -172,6 +209,29 @@ function TemperatureChart({ history, city }) {
                     ))}
                 </div>
             </div>
+
+            {/* Inline Filter Toolbar */}
+            <div className="chart-filter-toolbar">
+                <div className="filter-group">
+                    <label><FiCalendar /> Start</label>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
+                </div>
+                <div className="filter-group">
+                    <label><FiClock /> End</label>
+                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
+                </div>
+                <div className="filter-actions">
+                    <button className="btn-filter apply" onClick={handleApplyFilters}>
+                        <FiFilter /> Apply
+                    </button>
+                    <button className="btn-filter reset" onClick={handleResetFilters}>
+                        <FiRefreshCw /> Reset
+                    </button>
+                </div>
+            </div>
+
             <ResponsiveContainer width="100%" height={320}>
                 {renderChart()}
             </ResponsiveContainer>

@@ -66,28 +66,6 @@ function Home({
                     setSelectedCity={setSelectedCity}
                 />
 
-                {/* Filter Toolbar */}
-                <div className="filter-toolbar">
-                    <div className="filter-group">
-                        <label><FiCalendar /> Start</label>
-                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                        <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
-                    </div>
-                    <div className="filter-group">
-                        <label><FiClock /> End</label>
-                        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-                        <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
-                    </div>
-                    <div className="filter-actions">
-                        <button className="btn-filter apply" onClick={handleApplyFilters}>
-                            <FiFilter /> Apply
-                        </button>
-                        <button className="btn-filter reset" onClick={handleResetFilters}>
-                            <FiRefreshCw /> Reset
-                        </button>
-                    </div>
-                </div>
-
                 {/* Detailed Metrics Grid */}
                 <div className="detailed-metrics-grid">
                     <MetricCard
