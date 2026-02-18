@@ -24,8 +24,13 @@ function AppContent() {
     const pipelineStatus = pipeline;
     const liveStream = events;
 
+    console.log('[DEBUG] AppContent Rendering', { isConnected, selectedCity, cityDataCount: Object.keys(currentData).length });
+
     return (
         <div className="app">
+            <div style={{ position: 'fixed', top: 0, left: 0, padding: '4px 10px', background: '#f97316', color: 'white', fontSize: '12px', zIndex: 9999 }}>
+                React Dashboard Active | City: {selectedCity || 'None'} | Connected: {isConnected ? 'YES' : 'NO'}
+            </div>
             <Navbar />
 
             {/* Connection Status */}
