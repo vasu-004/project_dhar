@@ -6,7 +6,7 @@ import {
 
 function TemperatureChart({ history, city }) {
     const data = history.map((record, i) => ({
-        time: new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(record.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         temperature: record.temperature,
         feelsLike: record.feelsLike,
         humidity: record.humidity,
