@@ -4,22 +4,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="WeathX - Real-Time Weather Analytics Dashboard with AWS Kinesis + Lambda Simulation">
     <title>WeathX - Weather Analytics Dashboard</title>
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>">
-
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Socket.IO & Chart.js -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-    <!-- App Container -->
-    <div id="root"></div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i data-lucide="cloud-lightning" class="brand-icon"></i>
+                <span class="brand-text">WeathX</span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-link active" data-page="home">Home</button>
+                <button class="nav-link" data-page="pipeline">Pipeline</button>
+                <button class="nav-link" data-page="analytics">Analytics</button>
+            </div>
+            <div class="live-clock" id="live-clock">--:--:--</div>
+        </div>
+    </nav>
 
-    <!-- React Entry Point -->
-    <script type="module" src="src/main.jsx"></script>
+    <main class="main-content">
+        <!-- Home Page -->
+        <section id="page-home" class="page active">
+            <header class="page-header">
+                <div>
+                    <h1 class="page-title">Live Weather Radar</h1>
+                    <p class="page-subtitle">Real-time environmental monitoring across key cities</p>
+                </div>
+                <div class="city-tabs" id="city-tabs">
+                    <!-- Dynamic city buttons -->
+                </div>
+            </header>
+
+            <div class="metrics-grid" id="metrics-grid">
+                <!-- Temperature -->
+                <div class="metric-card temp">
+                    <div class="card-icon"><i data-lucide="thermometer"></i></div>
+                    <div class="card-content">
+                        <span class="label">Temperature</span>
+                        <h2 class="value" id="val-temp">--°C</h2>
+                        <p class="sub-value" id="val-feels">Feels like: --°C</p>
+                    </div>
+                </div>
+                <!-- Humidity -->
+                <div class="metric-card humidity">
+                    <div class="card-icon"><i data-lucide="droplets"></i></div>
+                    <div class="card-content">
+                        <span class="label">Humidity</span>
+                        <h2 class="value" id="val-humidity">--%</h2>
+                        <p class="sub-value">Current atmospheric moisture</p>
+                    </div>
+                </div>
+                <!-- Condition -->
+                <div class="metric-card condition">
+                    <div class="card-icon"><i data-lucide="cloud"></i></div>
+                    <div class="card-content">
+                        <span class="label">Condition</span>
+                        <h2 class="value" id="val-condition">Loading...</h2>
+                        <p class="sub-value" id="val-desc">Sky status</p>
+                    </div>
+                </div>
+                <!-- Precipitation -->
+                <div class="metric-card precipitation">
+                    <div class="card-icon"><i data-lucide="umbrella"></i></div>
+                    <div class="card-content">
+                        <span class="label">Precipitation</span>
+                        <h2 class="value" id="val-precip">-- mm</h2>
+                        <p class="sub-value">Observed rainfall</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forecast Section -->
+            <div class="forecast-section">
+                <h3 class="section-title">24-Hour Forecast</h3>
+                <div class="forecast-grid" id="forecast-grid">
+                    <!-- Dynamic forecast cards -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Pipeline Page -->
+        <section id="page-pipeline" class="page">
+            <div class="pipeline-container">
+                <h3 class="section-title">
+                    <i data-lucide="link"></i> AWS Pipeline Status
+                    <span class="connection-badge offline" id="conn-badge">○ Offline</span>
+                </h3>
+                <div class="pipeline-flow" id="pipeline-flow">
+                    <!-- Dynamic Pipeline Stages -->
+                </div>
+                <div class="pipeline-metrics" id="pipeline-metrics">
+                    <span>Avg Lambda Duration: <strong id="val-lambda-dur">--ms</strong></span>
+                    <span>Last Invocation: <strong id="val-last-inv">--</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Page -->
+        <section id="page-analytics" class="page">
+            <div class="chart-container">
+                <div class="chart-header-actions">
+                    <h3 class="section-title"><i data-lucide="area-chart"></i> Weather Analytics — <span
+                            id="chart-city-name">City</span></h3>
+                    <div class="chart-type-switcher">
+                        <button class="chart-type-btn active" data-type="line">Line</button>
+                        <button class="chart-type-btn" data-type="bar">Bar</button>
+                    </div>
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas id="weatherChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <span class="app-version">WeathX v2.0 - Vanilla Edition</span>
+            <div class="system-status">
+                <span class="status-dot green"></span>
+                <span>System Operational</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
 </body>
 
 </html>
