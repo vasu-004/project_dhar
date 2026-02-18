@@ -15,6 +15,7 @@ function AppContent() {
         selectedCity,
         setSelectedCity,
         history,
+        fetchHistory,
         pipeline,
         connected,
         events
