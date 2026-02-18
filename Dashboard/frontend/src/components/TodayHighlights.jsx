@@ -82,7 +82,7 @@ function TodayHighlights({ currentData, city }) {
                                 <circle cx="50" cy="50" r="40" fill="url(#uvGradient)" />
                                 <circle cx="50" cy="50" r="30" fill="rgba(255, 255, 255, 0.3)" />
                                 <text x="50" y="58" textAnchor="middle" fill="#fff" fontSize="28" fontWeight="bold">
-                                    {getUVIndex().toFixed(1)}
+                                    {(data?.uvIndex !== undefined ? data.uvIndex : getUVIndex()).toFixed(1)}
                                 </text>
                                 <defs>
                                     <linearGradient id="uvGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -92,7 +92,7 @@ function TodayHighlights({ currentData, city }) {
                                 </defs>
                             </svg>
                         </div>
-                        <div className="uv-label">Low</div>
+                        <div className="uv-label">{(data?.uvIndex || getUVIndex()) < 3 ? 'Low' : 'High'}</div>
                     </div>
                 </div>
 
@@ -146,14 +146,14 @@ function TodayHighlights({ currentData, city }) {
                                 </defs>
                                 <path d="M50 10 C50 10, 30 35, 30 55 C30 68, 38 80, 50 80 C62 80, 70 68, 70 55 C70 35, 50 10, 50 10 Z"
                                     fill="url(#humidityGradient)" opacity="0.3" />
-                                <rect x="30" y={`${80 - (data?.humidity || 67) * 0.7}`} width="40"
-                                    height={`${(data?.humidity || 67) * 0.7}`}
+                                <rect x="30" y={`${80 - (data?.humidity || 0) * 0.7}`} width="40"
+                                    height={`${(data?.humidity || 0) * 0.7}`}
                                     fill="url(#humidityGradient)"
                                     clipPath="url(#dropClip)" />
                             </svg>
                         </div>
-                        <div className="humidity-value-large">{data?.humidity || 67}<span className="humidity-percent">%</span></div>
-                        <div className="humidity-status">{(data?.humidity || 67) > 70 ? 'High' : 'Normal'}</div>
+                        <div className="humidity-value-large">{data?.humidity || 0}<span className="humidity-percent">%</span></div>
+                        <div className="humidity-status">{(data?.humidity || 0) > 70 ? 'High' : 'Normal'}</div>
                     </div>
                 </div>
             </div>

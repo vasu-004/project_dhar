@@ -39,7 +39,7 @@ function Home({
                     />
                     <MetricCard
                         title="Precipitation"
-                        value={0}
+                        value={cityData?.precipitation || 0}
                         unit="mm"
                         icon="precipitation"
                         color="#3b82f6"
@@ -67,7 +67,7 @@ function Home({
                     />
                     <MetricCard
                         title="UV Index"
-                        value={9.10}
+                        value={cityData?.uvIndex || 0}
                         unit=""
                         icon="uv"
                         color="#f97316"

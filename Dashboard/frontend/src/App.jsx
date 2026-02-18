@@ -45,7 +45,7 @@ function AppContent() {
                             cities={cities}
                             selectedCity={selectedCity}
                             setSelectedCity={setSelectedCity}
-                            history={history[selectedCity] || []}
+                            history={history}
                         />
                     }
                 />

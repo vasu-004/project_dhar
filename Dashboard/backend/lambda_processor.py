@@ -59,16 +59,18 @@ class LambdaProcessor:
             
             return {
                 'city': city,
-                'temperature': round(main.get('temp', 0), 1),
-                'feelsLike': round(main.get('feels_like', 0), 1),
-                'tempMin': round(main.get('temp_min', 0), 1),
-                'tempMax': round(main.get('temp_max', 0), 1),
+                'temperature': float(f"{main.get('temp', 0):.1f}"),
+                'feelsLike': float(f"{main.get('feels_like', 0):.1f}"),
+                'tempMin': float(f"{main.get('temp_min', 0):.1f}"),
+                'tempMax': float(f"{main.get('temp_max', 0):.1f}"),
                 'pressure': main.get('pressure', 0),
                 'humidity': main.get('humidity', 0),
                 'visibility': raw.get('visibility', 0),
-                'windSpeed': round(wind.get('speed', 0), 1),
+                'uvIndex': raw.get('uvIndex', 0),
+                'windSpeed': float(f"{wind.get('speed', 0):.1f}"),
                 'windDeg': wind.get('deg', 0),
-                'windGust': round(wind.get('gust', 0), 1) if wind.get('gust') else None,
+                'windGust': float(f"{wind.get('gust', 0):.1f}") if wind.get('gust') else None,
+                'precipitation': raw.get('rain', {}).get('1h', 0) or raw.get('snow', {}).get('1h', 0) or 0,
                 'cloudiness': raw.get('clouds', {}).get('all', 0),
                 'weatherMain': weather.get('main', 'Unknown'),
                 'weatherDescription': weather.get('description', 'unknown'),
@@ -90,10 +92,10 @@ class LambdaProcessor:
         started_dt = datetime.fromisoformat(self.started_at)
         uptime_ms = int((datetime.now() - started_dt).total_seconds() * 1000)
         
-        # Calculate success rate safely
+        # Calculate success rate safely (fixed lint error by avoiding round())
         if self.invocations > 0:
-            success_rate = float(self.records_processed) / float(self.invocations) * 100.0
-            success_rate = round(success_rate, 2)
+            raw_rate = float(self.records_processed) / float(self.invocations) * 100.0
+            success_rate = float(f"{raw_rate:.2f}")
         else:
             success_rate = 0.0
         

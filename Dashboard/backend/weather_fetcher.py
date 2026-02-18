@@ -65,9 +65,10 @@ class WeatherFetcher:
         
         # Schedule next fetch
         if self.status == 'RUNNING':
-            self.timer = threading.Timer(self.interval_sec, self._fetch_all)
-            self.timer.daemon = True
-            self.timer.start()
+            timer = threading.Timer(self.interval_sec, self._fetch_all)
+            timer.daemon = True
+            self.timer = timer
+            timer.start()
     
     def _fetch_from_api(self, city: str) -> dict:
         """Fetch real data from OpenWeatherMap API."""
@@ -110,10 +111,10 @@ class WeatherFetcher:
             'coord': city_defaults['coord'],
             'weather': [condition],
             'main': {
-                'temp': round(base_temp, 1),
-                'feels_like': round(base_temp - 1 + random.random() * 2, 1),
-                'temp_min': round(base_temp - 2, 1),
-                'temp_max': round(base_temp + 2, 1),
+                'temp': float(f"{base_temp:.1f}"),
+                'feels_like': float(f"{(base_temp - 1 + random.random() * 2):.1f}"),
+                'temp_min': float(f"{(base_temp - 2):.1f}"),
+                'temp_max': float(f"{(base_temp + 2):.1f}"),
                 'pressure': 1010 + random.randint(0, 15),
                 'humidity': city_defaults['baseHumidity'] + random.randint(-10, 10),
                 'sea_level': 1013 + random.randint(0, 5),
@@ -121,9 +122,9 @@ class WeatherFetcher:
             },
             'visibility': 5000 + random.randint(0, 5000),
             'wind': {
-                'speed': round(2 + random.random() * 8, 1),
+                'speed': float(f"{(2 + random.random() * 8):.1f}"),
                 'deg': random.randint(0, 360),
-                'gust': round(5 + random.random() * 10, 1)
+                'gust': float(f"{(5 + random.random() * 10):.1f}")
             },
             'clouds': {'all': random.randint(0, 100)},
             'dt': now,
@@ -132,6 +133,8 @@ class WeatherFetcher:
                 'sunrise': sunrise,
                 'sunset': sunset
             },
+            'uvIndex': float(f"{(0.5 + random.random() * 10):.1f}"),
+            'rain': {'1h': float(f"{(random.random() * 5):.2f}")} if condition['main'] == 'Rain' else {},
             'timezone': 19800,  # IST: UTC+5:30
             'id': city_defaults['id'],
             'name': city

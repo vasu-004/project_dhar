@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
+
 // Dynamic URLs - works in development (localhost) and production (VM IP)
 const API_BASE = import.meta.env.DEV
     ? 'http://localhost:5000'
     : window.location.protocol + '//' + window.location.hostname + ':5000';
 
-const WS_URL = import.meta.env.DEV
-    ? 'ws://localhost:5000'
-    : (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.hostname + ':5000';
+const SOCKET_URL = import.meta.env.DEV
+    ? 'http://localhost:5000'
+    : window.location.protocol + '//' + window.location.hostname + ':5000';
 
 export function useWeatherData() {
     const [currentData, setCurrentData] = useState({});
@@ -16,64 +18,57 @@ export function useWeatherData() {
     const [pipeline, setPipeline] = useState(null);
     const [connected, setConnected] = useState(false);
     const [events, setEvents] = useState([]);
-    const wsRef = useRef(null);
-    const reconnectTimeout = useRef(null);
+    const socketRef = useRef(null);
 
-    // Connect WebSocket
-    const connectWS = useCallback(() => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    // Connect WebSocket via Socket.IO
+    const connectSocket = useCallback(() => {
+        if (socketRef.current?.connected) return;
 
-        const ws = new WebSocket(WS_URL);
-        wsRef.current = ws;
+        const socket = io(SOCKET_URL, {
+            reconnectionAttempts: 5,
+            reconnectionDelay: 3000,
+        });
+        socketRef.current = socket;
 
-        ws.onopen = () => {
+        socket.on('connect', () => {
             setConnected(true);
-            console.log('[WS] Connected');
-        };
+            console.log('[Socket.IO] Connected');
+        });
 
-        ws.onmessage = (event) => {
-            try {
-                const msg = JSON.parse(event.data);
-
-                if (msg.type === 'INIT') {
-                    setCurrentData(msg.data.current || {});
-                    setCities(msg.data.cities || []);
-                    setPipeline(msg.data.pipeline || null);
-                    if (msg.data.cities?.length && !selectedCity) {
-                        setSelectedCity(msg.data.cities[0]);
-                    }
-                }
-
-                if (msg.type === 'WEATHER_UPDATE') {
-                    setCurrentData(prev => ({
-                        ...prev,
-                        [msg.data.city]: msg.data.current
-                    }));
-                    setPipeline(msg.data.pipeline || null);
-
-                    // Add to events log
-                    setEvents(prev => [{
-                        id: Date.now(),
-                        city: msg.data.city,
-                        temp: msg.data.current?.temperature,
-                        weather: msg.data.current?.weatherDescription,
-                        time: new Date().toLocaleTimeString()
-                    }, ...prev].slice(0, 50));
-                }
-            } catch (err) {
-                console.error('[WS] Parse error:', err);
+        socket.on('INIT', (msg) => {
+            setCurrentData(msg.data.current || {});
+            setCities(msg.data.cities || []);
+            setPipeline(msg.data.pipeline || null);
+            if (msg.data.cities?.length && !selectedCity) {
+                setSelectedCity(msg.data.cities[0]);
             }
-        };
+        });
 
-        ws.onclose = () => {
+        socket.on('WEATHER_UPDATE', (msg) => {
+            setCurrentData(prev => ({
+                ...prev,
+                [msg.data.city]: msg.data.current
+            }));
+            setPipeline(msg.data.pipeline || null);
+
+            // Add to events log
+            setEvents(prev => [{
+                id: Date.now(),
+                city: msg.data.city,
+                temp: msg.data.current?.temperature,
+                weather: msg.data.current?.weatherDescription,
+                time: new Date().toLocaleTimeString()
+            }, ...prev].slice(0, 50));
+        });
+
+        socket.on('disconnect', () => {
             setConnected(false);
-            console.log('[WS] Disconnected — reconnecting in 3s');
-            reconnectTimeout.current = setTimeout(connectWS, 3000);
-        };
+            console.log('[Socket.IO] Disconnected');
+        });
 
-        ws.onerror = () => {
-            ws.close();
-        };
+        socket.on('connect_error', (err) => {
+            console.error('[Socket.IO] Connection error:', err);
+        });
     }, [selectedCity]);
 
     // Fetch history for selected city
@@ -90,12 +85,11 @@ export function useWeatherData() {
 
     // Connect on mount
     useEffect(() => {
-        connectWS();
+        connectSocket();
         return () => {
-            if (wsRef.current) wsRef.current.close();
-            if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
+            if (socketRef.current) socketRef.current.disconnect();
         };
-    }, [connectWS]);
+    }, [connectSocket]);
 
     // Fetch history when city changes
     useEffect(() => {
