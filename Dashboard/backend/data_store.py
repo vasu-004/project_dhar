@@ -40,9 +40,21 @@ class DataStore:
         """Get all latest records across all cities."""
         return dict(self.latest_by_city)
     
-    def get_history(self, city_name: str, limit: int = 50) -> List[dict]:
-        """Get history for a specific city."""
+    def get_history(self, city_name: str, limit: int = 50, start_ts: float = None, end_ts: float = None) -> List[dict]:
+        """Get history for a specific city with optional time filtering."""
         records = self.cities.get(city_name, [])
+        
+        if start_ts or end_ts:
+            filtered = []
+            for r in records:
+                ts = r.get('timestamp', 0)
+                if start_ts and ts < start_ts:
+                    continue
+                if end_ts and ts > end_ts:
+                    continue
+                filtered.append(r)
+            records = filtered
+
         return records[-limit:] if limit else records
     
     def get_cities(self) -> List[str]:

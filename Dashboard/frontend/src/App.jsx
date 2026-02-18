@@ -48,6 +48,7 @@ function AppContent() {
                             selectedCity={selectedCity}
                             setSelectedCity={setSelectedCity}
                             history={history}
+                            fetchHistory={fetchHistory}
                         />
                     }
                 />

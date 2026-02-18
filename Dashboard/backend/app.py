@@ -82,12 +82,16 @@ def get_weather_history():
         return jsonify({'error': 'city parameter required'}), 400
     
     limit = int(request.args.get('limit', 50))
-    history = data_store.get_history(city, limit)
+    start_ts = request.args.get('start', type=float)
+    end_ts = request.args.get('end', type=float)
+    
+    history = data_store.get_history(city, limit, start_ts, end_ts)
     
     return jsonify({
         'city': city,
         'count': len(history),
-        'records': history
+        'records': history,
+        'filters': {'start': start_ts, 'end': end_ts}
     })
 
 

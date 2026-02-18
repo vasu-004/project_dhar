@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import WeatherHeroCard from '../components/WeatherHeroCard';
 import MetricCard from '../components/MetricCard';
 import ForecastBar from '../components/ForecastBar';
@@ -6,15 +6,53 @@ import TemperatureChart from '../components/TemperatureChart';
 import SunriseSunsetCard from '../components/SunriseSunsetCard';
 import AirQualityCard from '../components/AirQualityCard';
 import ChanceOfRainChart from '../components/ChanceOfRainChart';
+import { FiFilter, FiCalendar, FiClock, FiRefreshCw } from 'react-icons/fi';
 
 function Home({
     currentData,
     cities,
     selectedCity,
     setSelectedCity,
-    history
+    history,
+    fetchHistory // We need to expose this from useWeatherData or pass it down
 }) {
     const cityData = currentData[selectedCity] || null;
+
+    // Filter State
+    const [startDate, setStartDate] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [endTime, setEndTime] = useState('');
+    const [isFiltering, setIsFiltering] = useState(false);
+
+    const handleApplyFilters = () => {
+        let startTs = null;
+        let endTs = null;
+
+        if (startDate) {
+            const start = new Date(`${startDate}T${startTime || '00:00'}`);
+            startTs = start.getTime() / 1000;
+        }
+
+        if (endDate) {
+            const end = new Date(`${endDate}T${endTime || '23:59'}`);
+            endTs = end.getTime() / 1000;
+        }
+
+        if (fetchHistory) {
+            fetchHistory(selectedCity, { start: startTs, end: endTs });
+            setIsFiltering(true);
+        }
+    };
+
+    const handleResetFilters = () => {
+        setStartDate('');
+        setStartTime('');
+        setEndDate('');
+        setEndTime('');
+        setIsFiltering(false);
+        if (fetchHistory) fetchHistory(selectedCity);
+    };
 
     return (
         <div className="home-page">
@@ -27,6 +65,28 @@ function Home({
                     selectedCity={selectedCity}
                     setSelectedCity={setSelectedCity}
                 />
+
+                {/* Filter Toolbar */}
+                <div className="filter-toolbar">
+                    <div className="filter-group">
+                        <label><FiCalendar /> Start</label>
+                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                        <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
+                    </div>
+                    <div className="filter-group">
+                        <label><FiClock /> End</label>
+                        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                        <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
+                    </div>
+                    <div className="filter-actions">
+                        <button className="btn-filter apply" onClick={handleApplyFilters}>
+                            <FiFilter /> Apply
+                        </button>
+                        <button className="btn-filter reset" onClick={handleResetFilters}>
+                            <FiRefreshCw /> Reset
+                        </button>
+                    </div>
+                </div>
 
                 {/* Detailed Metrics Grid */}
                 <div className="detailed-metrics-grid">
@@ -82,7 +142,7 @@ function Home({
 
                 {/* Temperature Forecast Chart */}
                 <div className="forecast-chart-container">
-                    <TemperatureChart history={history} city={selectedCity} />
+                    <TemperatureChart history={history} city={selectedCity} isFiltered={isFiltering} />
                 </div>
 
                 {/* Sunrise/Sunset */}

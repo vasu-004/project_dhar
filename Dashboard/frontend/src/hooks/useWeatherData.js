@@ -89,10 +89,15 @@ export function useWeatherData() {
     }, [selectedCity]);
 
     // Fetch history for selected city
-    const fetchHistory = useCallback(async (city) => {
+    const fetchHistory = useCallback(async (city, filters = {}) => {
         if (!city) return;
         try {
-            const res = await fetch(`${API_BASE}/api/weather/history?city=${encodeURIComponent(city)}&limit=50`);
+            const { start, end } = filters;
+            let url = `${API_BASE}/api/weather/history?city=${encodeURIComponent(city)}&limit=100`;
+            if (start) url += `&start=${start}`;
+            if (end) url += `&end=${end}`;
+
+            const res = await fetch(url);
             const data = await res.json();
             setHistory(data.records || []);
         } catch {
@@ -123,6 +128,7 @@ export function useWeatherData() {
         selectedCity,
         setSelectedCity,
         history,
+        fetchHistory,
         pipeline,
         connected,
         events
