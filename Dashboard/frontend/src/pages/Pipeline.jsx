@@ -21,7 +21,7 @@ function Pipeline({ pipeline, connected }) {
                     <p className="info-text">OpenWeatherMap API fetching data every 60 seconds for 6 Indian cities</p>
                     <div className="info-stat">
                         <span className="stat-label">Cities Monitored:</span>
-                        <span className="stat-value">6</span>
+                        <span className="stat-value">{pipeline?.dataStore?.totalCities || 0}</span>
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@ function Pipeline({ pipeline, connected }) {
                     <p className="info-text">DynamoDB table storing historical weather data for analysis</p>
                     <div className="info-stat">
                         <span className="stat-label">Total Records:</span>
-                        <span className="stat-value">{pipeline?.dataStore?.recordCount || 0}</span>
+                        <span className="stat-value">{pipeline?.dataStore?.totalRecordsProcessed || 0}</span>
                     </div>
                 </div>
             </div>

@@ -27,14 +27,14 @@ function PipelineStatus({ pipeline, connected }) {
             name: 'Kinesis Stream',
             subtitle: kinesis.streamName || 'WeatherDataStream',
             status: kinesis.streamStatus === 'ACTIVE' ? 'active' : 'idle',
-            stats: `${kinesis.totalRecordsIngested || 0} records | ${kinesis.shardCount || 0} shards`,
+            stats: `${kinesis.recordCount || 0} records | ${kinesis.shardCount || 0} shards`,
             icon: '📡'
         },
         {
             name: 'Lambda Processor',
             subtitle: lambda.functionName || 'WeatherDataProcessor',
             status: lambda.status === 'ACTIVE' ? 'active' : 'idle',
-            stats: `${lambda.invocationCount || 0} invocations | ${lambda.successRate || 100}% success`,
+            stats: `${lambda.invocations || 0} invocations | ${lambda.successRate || 100}% success`,
             icon: 'λ'
         },
         {
