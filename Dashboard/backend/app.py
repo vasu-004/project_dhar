@@ -1,10 +1,5 @@
-# ============================================================
-# app.py — Main Flask + WebSocket Server
-# ============================================================
-# Orchestrates the full AWS-simulated pipeline:
-#   OpenWeatherMap → Kinesis → Lambda → DataStore → Dashboard
-# Exposes REST APIs and WebSocket for the frontend.
-# ============================================================
+import eventlet
+eventlet.monkey_patch()
 
 import os
 from datetime import datetime
@@ -31,8 +26,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'weather-dashboard-secret-key')
 CORS(app)
 
-# Initialize SocketIO (using threading mode for Python 3.12 compatibility)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+# Initialize SocketIO (using eventlet for real WebSocket support)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # ---- Initialize AWS-Simulated Pipeline ----
 print('═══════════════════════════════════════════════════')
@@ -204,4 +199,4 @@ if __name__ == '__main__':
     weather_fetcher.start()
     
     # Run the Flask-SocketIO server
-    socketio.run(app, host='0.0.0.0', port=PORT, debug=False, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=PORT, debug=False)

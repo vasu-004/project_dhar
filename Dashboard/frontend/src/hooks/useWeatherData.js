@@ -25,14 +25,25 @@ export function useWeatherData() {
         if (socketRef.current?.connected) return;
 
         const socket = io(SOCKET_URL, {
-            reconnectionAttempts: 5,
-            reconnectionDelay: 3000,
+            reconnectionAttempts: 8,
+            reconnectionDelay: 2000,
+            transports: ['polling', 'websocket'], // Smooth upgrade path
+            forceNew: true
         });
         socketRef.current = socket;
 
         socket.on('connect', () => {
             setConnected(true);
-            console.log('[Socket.IO] Connected');
+            console.log('[Socket.IO] Connected via:', socket.io.engine.transport.name);
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('[Socket.IO] Connection error details:', {
+                message: err.message,
+                type: err.type,
+                description: err.description,
+                context: err.context
+            });
         });
 
         socket.on('INIT', (msg) => {
